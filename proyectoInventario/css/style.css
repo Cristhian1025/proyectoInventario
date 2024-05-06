@@ -1,0 +1,28 @@
+
+
+body{
+    font-family:"Pangolin", cursive;
+    font-weight: 400;
+    font-style: normal;
+}
+
+div{
+    
+    width: 10%;
+    background-color: blue;
+    
+}
+.limpiar{
+    clear: both;
+}
+
+img{
+    float: left;
+    margin: 0 2rem;
+}
+.caja{
+    position: sticky;
+    top:35%;
+    bottom: 35%;
+    left:0;
+}

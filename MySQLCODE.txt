@@ -1,0 +1,160 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+-- -----------------------------------------------------
+-- Schema inventario
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema inventario
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `inventario` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci ;
+USE `inventario` ;
+
+-- -----------------------------------------------------
+-- Table `inventario`.`Proveedores`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `inventario`.`Proveedores` (
+  `idProveedor` INT NOT NULL,
+  `nombreProveedor` VARCHAR(45) NOT NULL,
+  `descripcionProveedor` VARCHAR(120) NOT NULL,
+  `direccionProveedor` VARCHAR(45) NOT NULL,
+  `telefono` VARCHAR(25) NOT NULL,
+  `Correo` VARCHAR(45) NOT NULL,
+  `infoAdicional` VARCHAR(225) NULL,
+  PRIMARY KEY (`idProveedor`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `inventario`.`Categorias`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `inventario`.`Categorias` (
+  `idCategoria` INT NOT NULL,
+  `nombreCategoria` VARCHAR(45) NOT NULL,
+  `descripcionCategoria` VARCHAR(120) NOT NULL,
+  PRIMARY KEY (`idCategoria`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `inventario`.`Productos`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `inventario`.`Productos` (
+  `idProducto` INT NOT NULL,
+  `nombreProducto` VARCHAR(45) NOT NULL,
+  `descripcionProducto` VARCHAR(120) NOT NULL,
+  `cantidad` INT NOT NULL DEFAULT 0,
+  `precioVenta` DECIMAL(10,2) NOT NULL DEFAULT 0,
+  `precioCompra` DECIMAL(10,2) NOT NULL DEFAULT 0,
+  `proveedorId` INT NOT NULL,
+  `CategoriaId` INT NOT NULL,
+  PRIMARY KEY (`idProducto`),
+  INDEX `proveedorId_idx` (`proveedorId` ASC) VISIBLE,
+  INDEX `categoriaId_idx` (`CategoriaId` ASC) VISIBLE,
+  CONSTRAINT `proveedorId`
+    FOREIGN KEY (`proveedorId`)
+    REFERENCES `inventario`.`Proveedores` (`idProveedor`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE,
+  CONSTRAINT `categoriaId`
+    FOREIGN KEY (`CategoriaId`)
+    REFERENCES `inventario`.`Categorias` (`idCategoria`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `inventario`.`EntradaProductos`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `inventario`.`EntradaProductos` (
+  `idEntrada` INT NOT NULL,
+  `fechaEntrada` DATE NOT NULL,
+  `productoId` INT NOT NULL,
+  `cantidadComprada` INT NOT NULL,
+  `precioCompraUnidad` DECIMAL(10,2) NOT NULL,
+  `proveedorId` INT NOT NULL,
+  PRIMARY KEY (`idEntrada`),
+  INDEX `productoId_idx` (`productoId` ASC) VISIBLE,
+  INDEX `proveedorId_idx` (`proveedorId` ASC) VISIBLE,
+  CONSTRAINT `productoId`
+    FOREIGN KEY (`productoId`)
+    REFERENCES `inventario`.`Productos` (`idProducto`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE,
+  CONSTRAINT `proveedorId`
+    FOREIGN KEY (`proveedorId`)
+    REFERENCES `inventario`.`Proveedores` (`idProveedor`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `inventario`.`TipoUsuario`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `inventario`.`TipoUsuario` (
+  `idUsuario` INT NOT NULL,
+  `tipoUsuario` INT NOT NULL,
+  `descripcionUsuario` VARCHAR(120) NOT NULL,
+  PRIMARY KEY (`idUsuario`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `inventario`.`Usuario`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `inventario`.`Usuario` (
+  `idUsuario` INT NOT NULL,
+  `nombreCompleto` VARCHAR(45) NOT NULL,
+  `tipoUsuario` INT NOT NULL,
+  `nombreUsuario` VARCHAR(25) NOT NULL,
+  `contrasenia` VARCHAR(25) NOT NULL,
+  `correo` VARCHAR(45) NOT NULL,
+  `telefono` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idUsuario`),
+  INDEX `TipoUsuario_idx` (`tipoUsuario` ASC) VISIBLE,
+  CONSTRAINT `TipoUsuario`
+    FOREIGN KEY (`tipoUsuario`)
+    REFERENCES `inventario`.`TipoUsuario` (`idUsuario`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `inventario`.`Ventas`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `inventario`.`Ventas` (
+  `idVenta` INT NOT NULL,
+  `fechaVenta` DATE NOT NULL,
+  `productoId` INT NOT NULL,
+  `cantidadVenta` INT NOT NULL,
+  `precioVentaTotal` INT NOT NULL,
+  `vendedorId` INT NOT NULL,
+  PRIMARY KEY (`idVenta`),
+  INDEX `productoId_idx` (`productoId` ASC) VISIBLE,
+  INDEX `vendedorId_idx` (`vendedorId` ASC) VISIBLE,
+  CONSTRAINT `productoId`
+    FOREIGN KEY (`productoId`)
+    REFERENCES `inventario`.`Productos` (`idProducto`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE,
+  CONSTRAINT `vendedorId`
+    FOREIGN KEY (`vendedorId`)
+    REFERENCES `inventario`.`Usuario` (`idUsuario`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
