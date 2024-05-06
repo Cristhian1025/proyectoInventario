@@ -8,22 +8,17 @@
     <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap'>
     <link rel="stylesheet" href="./css/style_1.css">
 
-    <style>
-        /* Estilos CSS */
-        
-    </style>
 </head>
 <body>
     <header>
         <h1>Inventario de Papelería</h1>
     </header>
     <nav>        
-        <a href="#" class="caja_nav">Inicio</a>
-        <a href="#" class="caja_nav">Nosotros</a>
-        <a href="#" class="caja_nav">Servicios</a>
-        <a href="#" class="caja_nav">Contacto</a>
+        <a href="dashboard.html" class="caja_nav">Inicio</a>
+        <a href="#" class="caja_nav">Empleados</a>
+        <a href="productos.html" class="caja_nav">Productos</a>
+        <a href="proveedores.html" class="caja_nav">proveedores</a>
     </nav>
-
     <div class="container">
         <div class="form-container">
             <h2>Agregar Nuevo Producto</h2>
@@ -32,6 +27,7 @@
             <input type="text" id="descripcion" class="input-field" placeholder="Descripción">
             <input type="number" id="cantidad" class="input-field" placeholder="Cantidad">
             <input type="number" id="costo" class="input-field" placeholder="Costo">
+            //Botones que utilizan Javascript por el momento
             <button class="btn" onclick="agregarProducto()">Agregar al Final</button>
             <button class="btn" onclick="agregarInicio()">Agregar al Inicio</button>
             <button class="btn" onclick="eliminarPorCodigo()">Eliminar por Código</button>
@@ -41,15 +37,17 @@
             <button class="btn" onclick="listarInverso()">Listar Inverso</button>
         </div>
         <div class="output-container" id="output">
-            <!-- Aquí se mostrarán los resultados -->
         </div>
     </div>
+    
     <footer>
-        <p>&copy; 2024 "Tu Papelito". Todos los derechos reservados.</p>
+        <p>&copy; 2024 "InventarioInc". Todos los derechos reservados.</p>
     </footer>
 
     <script>
         // Definición de la lista enlazada y las funciones para manipularla
+        //mientras se conecta con la base de datos SQL
+
         class Producto {
             constructor(codigo, nombre, descripcion, cantidad, costo) {
                 this.codigo = codigo;
@@ -227,5 +225,6 @@
             output.innerHTML = `<p>${mensaje}</p>`;
         }
     </script>
+
 </body>
 </html>
