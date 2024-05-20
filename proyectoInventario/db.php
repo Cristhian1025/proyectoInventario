@@ -7,8 +7,8 @@ $conn = mysqli_connect(
     'inventario'
 );
 
-if (isset($conn)){
-    echo "coneccioon";
+if ($conn->connect_error) {
+    die("Conexión fallida: " . $conn->connect_error);
 }
 
 
