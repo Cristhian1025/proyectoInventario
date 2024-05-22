@@ -1,22 +1,10 @@
 <?php 
     include("db.php");
-?>
-
-<?php  include("includes/header.php") ?>
-    <header>
-        <h1>Inventario de Papelería</h1>
-    </header>
-    <nav> 
-        <a href="dashboard.html" class="caja_nav">Inicio</a>
-        <a href="#" class="caja_nav">Empleados</a>
-        <a href="productos.html" class="caja_nav" style="background-color: blue; color: aliceblue;">Productos</a>
-        <a href="proveedores.html" class="caja_nav">proveedores</a>
-    </nav>
-
-    <h2>PRODUCTOS</h2>
+  include("includes/header.php") ?>
     
+
     <div class="container mt-5">
-    <h2 class="mb-4">Ingreso de productos</h2>
+    <h2 class="mb-4">Ingreso de Nuevos Productos</h2>
     <form action="save_producto.php" method="POST">
         <div class="form-group">
             <label for="idProducto">ID Producto</label>
@@ -53,10 +41,4 @@
         <button type="submit" class="btn btn-primary">Enviar</button>
     </form>
 </div>
-    
-    <footer>
-        <p>&copy; 2024 "InventarioInc". Todos los derechos reservados.</p>
-    </footer>
-
-</body>
-</html>
+<?php  include("includes/footer.php") ?>

@@ -1,18 +1,10 @@
 <?php 
     include("db.php");
   
-  
 include("includes/header.php") ?>
-
-<nav class ="navbar navbar-dark bg-dark">        
-        <a href="dashboard.php" class="caja_nav" style="background-color: blue; color: aliceblue;">Inicio</a>
-        <!-- <a href="#" class="caja_nav">Empleados</a> -->
-        <a href="productos.php" class="caja_nav">Productos</a>
-        <a href="proveedores.php" class="caja_nav">proveedores</a>
-    </nav>
-
+  <div class="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]"><div class="absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_500px_at_50%_200px,#C9EBFF,transparent)]"></div></div>
+  <div class="absolute inset-0 -z-10 h-full w-full bg-white bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]"></div>
     <h1>    PANEL DE CONTROL</h1>
-
     <div class="container mt-4">
     <form action="dashboard.php" method="POST">
         <div class="form-group">
@@ -28,12 +20,15 @@ include("includes/header.php") ?>
 </div>
 
 <div class="container mt-4">
+
+<!-- CODIGO INCRUSTADO DE PHP -->
+
     <?php
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $opcion = $_POST['opcion'];
 
         if ($opcion == 'productos') {
-            $sql = "SELECT * FROM Productos";
+            $sql = "SELECT * FROM Productos";  //consulta SQL para Prouctos
             $result = $conn->query($sql);
 
             if ($result->num_rows > 0) {
@@ -61,7 +56,7 @@ include("includes/header.php") ?>
                 echo "No hay productos.";
             }
         } elseif ($opcion == 'proveedores') {
-            $sql = "SELECT * FROM Proveedores";
+            $sql = "SELECT * FROM Proveedores";  //consulta SQL para Prouctos
             $result = $conn->query($sql);
 
             if ($result->num_rows > 0) {
@@ -91,7 +86,7 @@ include("includes/header.php") ?>
         } elseif ($opcion == 'ambos') {
             $sql = "SELECT P.nombreProducto, P.cantidad, Pr.nombreProveedor, Pr.telefono, Pr.Correo 
                     FROM Productos P 
-                    JOIN Proveedores Pr ON P.proveedorId = Pr.idProveedor";
+                    INNER JOIN Proveedores Pr ON P.proveedorId = Pr.idProveedor"; //consulta SQL para Prouctos
             $result = $conn->query($sql);
 
             if ($result->num_rows > 0) {
@@ -107,6 +102,7 @@ include("includes/header.php") ?>
                         <td>{$row['Correo']}</td>
                     </tr>";
                 }
+                
                 echo "</table>";
             } else {
                 echo "No hay datos.";
@@ -115,12 +111,4 @@ include("includes/header.php") ?>
     }
     ?>
 </div>
-
-
 <?php  include("includes/footer.php") ?>
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-</body>
-</html>
-    

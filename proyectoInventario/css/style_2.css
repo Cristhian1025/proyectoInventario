@@ -7,8 +7,11 @@ body {
   justify-content: center;
   background: #3700ff4e;
   height: 100vh;
-}
 
+
+
+  
+}
 .screen-1 .caja1{
   height: 95%;
   background: #b8d5f6;
@@ -24,13 +27,14 @@ body {
 }
 
 .screen-1 .formulario{
+  height: 95%;
   background: #b8d5f6;
   padding: 2em;
   display: flex;
   flex-direction: column;
   border-radius: 0 30px 30px 30px;
   box-shadow: 5px -5px 5px #0000004f;
-  gap: 2em;
+  gap: 2em; 
 }
 .screen-1 .logo {
   margin-top: -1em;
@@ -130,3 +134,4 @@ body {
 button {
   cursor: pointer;
 }
+
