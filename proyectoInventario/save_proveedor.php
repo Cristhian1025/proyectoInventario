@@ -4,7 +4,6 @@ if (isset($_POST['save_proveedor'])){
     
     include("db.php");
 
-    $idProveedor = $_POST["idProveedor"];
     $nombreProveedor = $_POST["nombreProveedor"];
     $descripcionProveedor = $_POST["descripcionProveedor"];
     $direccionProveedor = $_POST["direccionProveedor"];
@@ -12,15 +11,19 @@ if (isset($_POST['save_proveedor'])){
     $Correo = $_POST["Correo"];
     $infoAdicional = $_POST["infoAdicional"];
 
-    $sql = "INSERT INTO Proveedores (idProveedor, nombreProveedor, descripcionProveedor, direccionProveedor, telefono, Correo, infoAdicional)
-            VALUES ('$idProveedor' ,'$nombreProveedor', '$descripcionProveedor', '$direccionProveedor', '$telefono', '$Correo', '$infoAdicional')";
+    $sql = "INSERT INTO Proveedores (nombreProveedor, descripcionProveedor, direccionProveedor, telefono, Correo, infoAdicional)
+            VALUES (?,?,?,?,?,?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ssssss", $nombreProveedor, $descripcionProveedor, $direccionProveedor, $telefono, $Correo, $infoAdicional);
 
-    if ($conn->query($sql) === TRUE) {
-        header("location: dashboard.php");
-    } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
-    }
 
+    if ($stmt->execute()) {
+            header("location: dashboard.php");
+        } else {
+            echo "Error:<hr> " . $sql . "<hr>" . $conn->error;
+        }
+        $stmt->close();
+        $conn->close();
 
 }
 else{

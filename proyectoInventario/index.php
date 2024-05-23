@@ -28,7 +28,7 @@
   <div class="email">
     <label for="email">Nombre de Usuario</label>
     <div class="sec-2">
-      <input type="text" name="   usuario" placeholder="Username"/>
+      <input type="text" name="   usuario" placeholder="Username" required/>
     </div>
   </div>
 
@@ -37,7 +37,7 @@
     <label for="password">Contraseña</label>
     <div class="sec-2">      
       <ion-icon name="lock-closed-outline"></ion-icon>
-      <input class="pas" type="password" name="contrasenia" placeholder="············"/>
+      <input class="pas" type="password" name="contrasenia" required placeholder="············"/>
     </div>
   </div>
    <button type="submit" class="login" name="login" >Ingresar</button>

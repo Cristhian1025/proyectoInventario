@@ -1,10 +1,8 @@
 <?php    
-    include("db.php");
-
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "Guardando DATOS";
+        include("db.php");
 
-        $idProducto = $_POST["idProducto"];
         $nombreProducto = $_POST['nombreProducto'];
         $descripcionProducto = $_POST['descripcionProducto'];
         $cantidad = $_POST['cantidad'];
@@ -13,13 +11,12 @@
         $proveedorId = $_POST['proveedorId'];
         $CategoriaId = $_POST['CategoriaId'];
     
-        $sql = "INSERT INTO Productos (idProducto, nombreProducto, descripcionProducto, cantidad, precioVenta, precioCompra, proveedorId, CategoriaId)
-                VALUES (?,?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO Productos (nombreProducto, descripcionProducto, cantidad, precioVenta, precioCompra, proveedorId, CategoriaId)
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("issiddii",$idProducto, $nombreProducto, $descripcionProducto, $cantidad, $precioVenta, $precioCompra, $proveedorId, $CategoriaId);
+        $stmt->bind_param("ssiddii", $nombreProducto, $descripcionProducto, $cantidad, $precioVenta, $precioCompra, $proveedorId, $CategoriaId);
     
         if ($stmt->execute()) {
-            
             header("location: dashboard.php");
 
         } else {
@@ -28,8 +25,6 @@
     
         $stmt->close();
         $conn->close();
-
-
 }
 else{
 echo "Error, datos no recibidos aaaaaaaaaaaaaa";

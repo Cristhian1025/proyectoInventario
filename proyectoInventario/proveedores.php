@@ -5,13 +5,8 @@
 
     <div class="container mt-5">
     <h2 class="mb-4">Crear Nuevo Proveedor</h2>
-
     <form action="save_proveedor.php" method="POST">
 
-        <div class="form-group">
-            <label for="idProveedor">Id del Proveedor</label>
-            <input type="number" class="form-control" id="idProveedor" name="idProveedor" required>
-        </div>
         <div class="form-group">
             <label for="nombreProveedor">Nombre Proveedor</label>
             <input type="text" class="form-control" id="nombreProveedor" name="nombreProveedor" required>
