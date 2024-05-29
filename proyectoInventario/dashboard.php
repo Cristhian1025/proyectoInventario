@@ -15,7 +15,7 @@
                 <option value="ambos">Productos y Proveedores</option>
                 <option value="entradas">Entradas de Productos</option>
                 <option value="ventas">Ventas</option>
-            </select>
+            </select> 
         </div>
         <button type="submit" class="btn btn-primary">Mostrar</button>
     </form>
@@ -35,6 +35,7 @@
         FROM Productos P
         LEFT JOIN Proveedores Pr ON P.proveedorId = Pr.idProveedor
         LEFT JOIN Categorias C ON P.CategoriaId = C.idCategoria";
+
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
@@ -92,7 +93,7 @@ if ($result->num_rows > 0) {
         } elseif ($opcion == 'ambos') {
             $sql = "SELECT P.nombreProducto, P.cantidad, Pr.nombreProveedor, Pr.telefono, Pr.Correo 
                     FROM Productos P 
-                    INNER JOIN Proveedores Pr ON P.proveedorId = Pr.idProveedor"; //consulta SQL para Prouctos
+                    INNER JOIN Proveedores Pr ON P.proveedorId = Pr.idProveedor"; //consulta SQL para Unir Prouctos con proveedores
             $result = $conn->query($sql);
 
             if ($result->num_rows > 0) {

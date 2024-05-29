@@ -5,18 +5,19 @@
   <title>Ingresar</title>
   <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+  
   <link rel="stylesheet" href="css/style_2.css">
 </head>
 <body>
   
-    <div class="screen-1">
-    <div class="caja1">
+<div class="screen-1">
+  <div class="caja1">
     <div class="name">
       <h1>INVENTARIO EN LA NUBE</h1>
     </div>
-    <p>Acceda y gestione sus inventario <br>      de su negocio desde el navegador.    </p>
-</div>
-  </div>  
+    <p>Acceda y gestione su inventario <br> de su negocio desde el navegador.</p>
+  </div>
+</div>  
 
 
 <div class="screen-1">
