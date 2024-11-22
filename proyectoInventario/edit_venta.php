@@ -51,7 +51,8 @@ if (isset($_POST['update'])) {
         $stmt->bind_param("siiiii", $fechaVenta, $productoId, $nuevaCantidadVenta, $precioVentaTotal, $nuevoVendedorId, $idVenta);
         
         if ($stmt->execute()) {
-            header("location: dashboard.php");
+            $_SESSION['message'] = 'Venta actualizada correctamente';
+        $_SESSION['message_type'] = 'success';
         } else {
             echo "Error:<hr> " . $sql . "<hr>" . $conn->error;
         }
@@ -108,7 +109,7 @@ if (isset($_POST['update'])) {
                 ?>
             </select>
         </div>
-        <button type="submit" class="btn btn-primary" name="update">Actualizar</button>
+        <button type="submit" class="btn btn-primary mx-4 my-4" name="update">Actualizar</button>
     </form>
 </div>
 

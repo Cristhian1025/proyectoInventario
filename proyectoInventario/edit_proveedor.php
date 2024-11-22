@@ -32,12 +32,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             WHERE idProveedor = $id";
 
     if ($conn->query($sql) === TRUE) {
-        $registroActualizado = true;
-        echo '<script>
+        $_SESSION['message'] = 'Entrada actualizada correctamente';
+        $_SESSION['message_type'] = 'success';
         
-            window.open("https://javascript.info");
-        
-      </script>';
         header("Location: dashboard.php");
         exit();
     } else {
@@ -82,7 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <label for="infoAdicional">Información Adicional</label>
             <input type="text" class="form-control" id="infoAdicional" name="infoAdicional" value="<?php echo $row['infoAdicional']; ?>">
         </div>
-        <button type="submit" class="btn btn-primary">Actualizar</button>
+        <button type="submit" class="btn btn-primary mx-4 my-4">Actualizar</button>
     </form>
 </div>
 

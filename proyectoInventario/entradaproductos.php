@@ -51,9 +51,9 @@ $proveedores = mysqli_fetch_all($result_proveedores, MYSQLI_ASSOC);
                 <?php endforeach; ?>
             </select>
         </div>
-        <input type="submit" class="btn btn-success btn-block" name="save_entrada" value="Registrar Entrada">
+        <input type="submit" class="btn btn-success btn-block mx-4 my-4" name="save_entrada" value="Registrar Entrada">
     </form>
-</div>
 
+</div>
 
 <?php include("includes/footer.php") ?>

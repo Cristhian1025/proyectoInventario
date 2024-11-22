@@ -1,6 +1,7 @@
 <?php 
     include("db.php");
 ?>
+
 <?php  include("includes/header.php") ?>
 
     <div class="container mt-5">
@@ -31,7 +32,7 @@
             <label for="infoAdicional">Información Adicional</label>
             <textarea class="form-control" id="infoAdicional" name="infoAdicional"></textarea>
         </div>
-        <input type="submit" class="btn btn-success btn-block"
+        <input type="submit" class="btn btn-success btn-block mx-4 my-4"
         name="save_proveedor" value="Enviar">
     </form>
 </div>

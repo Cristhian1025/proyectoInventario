@@ -17,6 +17,8 @@
         $stmt->bind_param("ssiddii", $nombreProducto, $descripcionProducto, $cantidad, $precioVenta, $precioCompra, $proveedorId, $CategoriaId);
     
         if ($stmt->execute()) {
+            $_SESSION['message'] = 'producto ingresado correctamente';
+            $_SESSION['message_type'] = 'success';
             header("location: dashboard.php");
 
         } else {

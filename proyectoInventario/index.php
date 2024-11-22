@@ -5,7 +5,6 @@
   <title>Ingresar</title>
   <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-  
   <link rel="stylesheet" href="css/style_2.css">
 </head>
 <body>
@@ -19,20 +18,17 @@
   </div>
 </div>  
 
-
 <div class="screen-1">
-  <form class="formulario" action="login.php" method="POST" >
+  <form class="formulario" action="login.php" method="POST">
   <div class="logo">
     <img title="loginIMG"   class="logoindex" src="imagenes/inventario.jpg" width="300" height="auto">
   </div>
-
   <div class="email">
     <label for="email">Nombre de Usuario</label>
     <div class="sec-2">
       <input type="text" name="   usuario" placeholder="Username" required/>
     </div>
   </div>
-
 
   <div class="password">
     <label for="password">Contraseña</label>
@@ -45,6 +41,6 @@
   
   <div class="footer"><span>Registrarse</span><span>Contraseña olvidada?</span></div>
 </form>
-</div>  
+</div>
 </body>
 </html>

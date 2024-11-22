@@ -1,6 +1,5 @@
 <?php
     include("db.php");
-    
 
     $nombreUsuario = $_POST["usuario"];
     $contrasenia = $_POST["contrasenia"];
@@ -14,15 +13,15 @@
 
     if ($result->num_rows > 0) { // credenciales correctasss  :D, redirigir a dashboard
         $stmt->close();
-        $conn->close(); 
-        header("Location: dashboard.php?usuario=$nombreUsuario");
+        $conn->close();
+        $_SESSION['nombreUsuario']=$nombreUsuario;
+        header("Location: dashboard.php");
         exit();
     } else {// Credenciales incorrectas = mensaje de error
-        
-        echo "<h2>ERROR DE CREDENCIALES</h2>";
+        $_SESSION['message'] = 'usuario o contraseña incorrectos';
+        $_SESSION['message_type'] = 'danger';
+        header("Location: index.php");
     }
-
     $stmt->close();
     $conn->close();   
-
 ?>

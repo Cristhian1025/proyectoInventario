@@ -59,7 +59,7 @@ $categorias = mysqli_fetch_all($result_categorias, MYSQLI_ASSOC);
                 <?php endforeach; ?>
             </select>
         </div>
-        <button type="submit" class="btn btn-primary">Enviar</button>
+        <button type="submit" class="btn btn-primary mx-4 my-4">Enviar</button>
     </form>
 </div>
 <?php  include("includes/footer.php") ?>

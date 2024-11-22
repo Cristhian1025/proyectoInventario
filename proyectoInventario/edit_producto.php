@@ -19,7 +19,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sql = "UPDATE Productos SET nombreProducto='$nombreProducto', descripcionProducto='$descripcionProducto', cantidad='$cantidad', precioVenta='$precioVenta', precioCompra='$precioCompra', proveedorId='$proveedorId', CategoriaId='$CategoriaId' WHERE idProducto = $id";
 
     if ($conn->query($sql) === TRUE) {
-        echo "Registro actualizado exitosamente.";
+        $_SESSION['message'] = 'Producto actualizado correctamente';
+        $_SESSION['message_type'] = 'success';
     } else {
         echo "Error actualizando registro: " . $conn->error;
     }
@@ -66,7 +67,7 @@ include("includes/header.php") ?>
             <label for="CategoriaId">Categoría ID</label>
             <input type="number" class="form-control" id="CategoriaId" name="CategoriaId" value="<?php echo $row['CategoriaId']; ?>" required>
         </div>
-        <button type="submit" class="btn btn-primary">Actualizar</button>
+        <button type="submit" class="btn btn-primary mx-4 my-4">Actualizar</button>
     </form>
 </div>
 

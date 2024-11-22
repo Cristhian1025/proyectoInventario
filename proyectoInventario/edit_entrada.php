@@ -23,22 +23,22 @@ if (isset($_POST['update'])) {
     $precioCompraUnidad = $_POST['precioCompraUnidad'];
     $nuevoProveedorId = $_POST['proveedorId'];
 
-    // Obtener la cantidad anterior del producto
+    //  la cantidad anterior del producto
     $query = "SELECT cantidadComprada, productoId FROM EntradaProductos WHERE idEntrada = $idEntrada";
     $result = mysqli_query($conn, $query);
     $row = mysqli_fetch_array($result);
     $cantidadAnterior = $row['cantidadComprada'];
     $productoIdAnterior = $row['productoId'];
 
-    // Restar la cantidad anterior del producto anterior
+    // resta la cantidad anterior del producto anterior
     $query = "UPDATE Productos SET cantidad = cantidad - $cantidadAnterior WHERE idProducto = $productoIdAnterior";
     mysqli_query($conn, $query);
 
-    // Sumar la nueva cantidad al nuevo producto
+    //    suma la nueva cantidad al nuevo producto
     $query = "UPDATE Productos SET cantidad = cantidad + $nuevaCantidadComprada WHERE idProducto = $nuevoProductoId";
     mysqli_query($conn, $query);
 
-    // Actualizar la entrada de producto
+    //      actualiza la entrada de producto
     $query = "UPDATE EntradaProductos SET fechaEntrada = '$fechaEntrada', productoId = '$nuevoProductoId', cantidadComprada = '$nuevaCantidadComprada', precioCompraUnidad = '$precioCompraUnidad', proveedorId = '$nuevoProveedorId' WHERE idEntrada = $idEntrada";
     mysqli_query($conn, $query);
 
@@ -92,7 +92,7 @@ if (isset($_POST['update'])) {
                 
             </select>
         </div>
-        <button type="submit" class="btn btn-primary" name="update">Actualizar</button>
+        <button type="submit" class="btn btn-primary mx-4 my-4" name="update">Actualizar</button>
     </form>
 </div>
 

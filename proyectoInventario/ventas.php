@@ -38,7 +38,6 @@ $usuarios = mysqli_fetch_all($result_usuario, MYSQLI_ASSOC);
             <label for="cantidadVenta">Cantidad Vendida</label>
             <input type="number" class="form-control" id="cantidadVenta" name="cantidadVenta" required>
         </div>
-
         <!--   //No Necesario....
         <div class="form-group">
             <label for="precioCompraUnidad">Precio de Compra por Unidad</label>
@@ -46,7 +45,6 @@ $usuarios = mysqli_fetch_all($result_usuario, MYSQLI_ASSOC);
         </div>
 
         -->
-
         <div class="form-group">
             <label for="usuarioId">Vendedor</label>
             <select class="form-control" id="vendedorId" name="vendedorId" required>
@@ -59,7 +57,7 @@ $usuarios = mysqli_fetch_all($result_usuario, MYSQLI_ASSOC);
                 <?php endforeach; ?>
             </select>
         </div>
-        <input type="submit" class="btn btn-success btn-block" name="save_venta" value="Registrar Entrada">
+        <input type="submit" class="btn btn-success btn-block mx-4 my-4" name="save_venta" value="Registrar Entrada">
     </form>
 </div>
 
