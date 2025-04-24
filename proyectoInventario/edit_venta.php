@@ -20,7 +20,19 @@ if (isset($_POST['update'])) {
     $fechaVenta = $_POST['fechaVenta'];
     $nuevoProductoId = $_POST['productoId'];
     $nuevaCantidadVenta = $_POST['cantidadVenta'];
-    $nuevoPrecioVentaTotal = $_POST['precioVentaTotal'];
+
+//afdafa
+    $query = "SELECT precioVenta FROM productos where idProducto= $productoId";
+
+    $result_precio = mysqli_query($conn, $query);
+    if (!$result_precio) {
+        die("Query Failed: " . mysqli_error($conn));
+    }
+    $row_precio = mysqli_fetch_assoc($result_precio);
+    $precioVenta = $row_precio['precioVenta'];
+    $nuevoPrecioVentaTotal = $precioVenta * $nuevaCantidadVenta;
+
+
     $nuevoVendedorId = $_POST['vendedorId'];
 
     // Obtener la cantidad anterior del producto vendido
@@ -45,18 +57,16 @@ if (isset($_POST['update'])) {
 
     //echo "ERROR: $queryA";
 
-
     $sql = "UPDATE ventas SET fechaVenta = ?, productoId = ?, cantidadVenta = ?, precioVentaTotal = ?, vendedorId = ? WHERE idVenta = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("siiiii", $fechaVenta, $productoId, $nuevaCantidadVenta, $precioVentaTotal, $nuevoVendedorId, $idVenta);
-        
-        if ($stmt->execute()) {
-            $_SESSION['message'] = 'Venta actualizada correctamente';
-        $_SESSION['message_type'] = 'success';
-        } else {
-            echo "Error:<hr> " . $sql . "<hr>" . $conn->error;
-        }
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("siidii", $fechaVenta, $nuevoProductoId, $nuevaCantidadVenta, $nuevoPrecioVentaTotal, $nuevoVendedorId, $idVenta);
 
+if ($stmt->execute()) {
+    $_SESSION['message'] = 'Venta actualizada correctamente';
+    $_SESSION['message_type'] = 'success';
+} else {
+    echo "Error:<hr> " . $sql . "<hr>" . $conn->error;
+}
 
     //mysqli_query($conn, $queryA);
 
@@ -92,10 +102,7 @@ if (isset($_POST['update'])) {
             <label for="cantidadVenta">Cantidad Vendida</label>
             <input type="number" class="form-control" id="cantidadVenta" name="cantidadVenta" value="<?php echo $cantidadVenta; ?>" required>
         </div>
-        <div class="form-group">
-            <label for="precioVentaTotal">Precio Total de Venta</label>
-            <input type="number" step="0.01" class="form-control" id="precioVentaTotal" name="precioVentaTotal" value="<?php echo $precioVentaTotal; ?>" required>
-        </div>
+        
         <div class="form-group">
             <label for="vendedorId">Vendedor</label>
             <select class="form-control" id="vendedorId" name="vendedorId" required>

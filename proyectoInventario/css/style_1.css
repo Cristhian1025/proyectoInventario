@@ -1,0 +1,188 @@
+* {
+    font-family: "Poppins",'Times New Roman', Times, serif;
+  }
+  body {
+    overflow-y: hidden;
+    display: flex;
+    justify-content: center;
+    background: #3700ff2a;
+    height: 100vh;  
+  }
+  
+  .screen-1 .caja1{
+    height: 95%;
+    background: #b8d5f6;
+    padding: 2em;
+    display: flex;
+    flex-direction: column;
+    border-radius: 30px 0px 0px 30px;
+    box-shadow: -3px -3px 5px #0000006e;
+    gap: 2em;
+  }
+  
+  .caja1 p{
+    font-size:25px;
+    text-shadow: -1px 1px 3px #4051cdbf;
+  }
+  .caja1 h1{
+    
+    text-shadow: -1px -1px 3px #4051cdbf;
+  }
+  .name{
+    padding: 30% 0px 15%;
+  }
+  
+  .screen-1 .formulario{
+    height: 95%;
+    background: #b8d5f6;
+    padding: 2em;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0 30px 30px 30px;
+    box-shadow: 5px -5px 5px #0000004f;
+    gap: 2em; 
+  }
+  .screen-1 .logo {
+    margin-top: -1em;
+  }
+  
+  .logoindex{
+    border-radius: 15%;
+  }
+  .formulario{
+    display: inline-block;
+  
+  
+  }
+  
+  .email {
+    background: white;
+    box-shadow: 0 0 2em #e6e9f9;
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    border-radius: 20px;
+    color: #4d4d4d;
+    margin-top: -em;
+  }
+  .email input {
+    outline: none;
+    border: none;
+  }
+  .email input::-moz-placeholder {
+    color: black;
+    font-size: 0.9em;
+  }
+  .email input:-ms-input-placeholder {
+    color: black;
+    font-size: 0.9em;
+  }
+  .email input::placeholder {
+    color: black;
+    font-size: 0.9em;
+  }
+  .email ion-icon {
+    color: #4d4d4d;
+    margin-bottom: -0.2em;
+  }
+  .password {
+    background: white;
+    box-shadow: 0 0 2em #e6e9f9;
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    border-radius: 20px;
+    color: #4d4d4d;
+  }
+  .password input {
+    outline: none;
+    border: none;
+  }
+  .password input::-moz-placeholder {
+    color: black;
+    font-size: 0.9em;
+  }
+  .password input:-ms-input-placeholder {
+    color: black;
+    font-size: 0.9em;
+  }
+  .password input::placeholder {
+    color: black;
+    font-size: 0.9em;
+  }
+  .password ion-icon {
+    color: #4d4d4d;
+    margin-bottom: -0.2em;
+  }
+  .password .show-hide {
+    margin-right: -5em;
+  }
+  .login {
+    padding: 1em;
+    background: #3e4684;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-weight: 600;
+  }
+  .login:hover{
+    background-color: #2d3464;;
+  }
+  
+  .footer {
+    display: flex;
+    font-size: 0.7em;
+    color: #5e5e5e;
+    gap: 14em;
+    padding-bottom: 10em;
+  }
+  .footer span {
+    cursor: pointer;
+  }
+  button {
+    cursor: pointer;
+  }
+  
+      /* Asegúrate que la clase .alert definida en tu CSS se vea bien donde la pondremos */
+      /* Ejemplo: podrías querer ajustar el position o margin si .alert lo define como fixed */
+       .alert {
+          /* Revisa los estilos en style_1.css. Puede que necesites ajustar position, width, etc. */
+          /* position: relative; /* O static, dependiendo de tu layout */
+          /* width: 100%; */
+          /* margin-bottom: 1em; /* Espacio antes del siguiente elemento */
+          /* z-index: 10; /* Para asegurar que esté visible */
+          /* Tu estilo actual lo tiene como 'fixed', lo cual lo sacará del flujo normal. */
+          /* Si quieres que aparezca DENTRO del formulario, cambia 'fixed' a 'relative' o 'static' */
+          /* O déjalo 'fixed' si quieres que flote sobre la página */
+
+           /* --- TU CSS ACTUAL PARA .alert --- */
+           position:fixed; /* Esto lo saca del flujo y lo posiciona relativo a la ventana */
+           top: 15px; /* Lo posicionará cerca de la parte superior */
+           left: 50%; /* Centrado horizontalmente */
+           transform: translateX(-50%); /* Ajuste fino para centrado exacto */
+           margin: 0; /* Sobreescribir el margin auto si es necesario */
+           padding: 10px;
+           font-size: 14px;
+           text-align: center;
+           border-radius: 5px;
+           display: block; /* O 'inline-block' si prefieres */
+           max-width: 90%; /* Ajustar ancho máximo */
+           width: auto; /* Ancho basado en contenido */
+           background-color: #f8d7da; /* Color para danger */
+           color: #721c24; /* Color para danger */
+           border: 1px solid #f5c6cb; /* Color para danger */
+           z-index: 1000; /* Asegurar que esté por encima de otros elementos */
+       }
+       /* Añade otras clases si usas diferentes message_type */
+       .alert-success {
+          background-color: #d4edda;
+          color: #155724;
+          border-color: #c3e6cb;
+       }
+  
+  .alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+  }

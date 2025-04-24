@@ -1,8 +1,9 @@
 <?php
 include("db.php");
+
 $registroActualizado = false;
+
 if (isset($_GET['id'])) {
-    
     $id = $_GET['id'];
     $sql = "SELECT * FROM Proveedores WHERE idProveedor = $id";
     $result = $conn->query($sql);
@@ -44,6 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
+<?php include("includes/header.php") ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -83,6 +85,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </form>
 </div>
 
-<?php
-include("db.php");
-?>

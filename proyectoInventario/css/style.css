@@ -26,16 +26,7 @@ nav {
   );
 }
 
-.caja_nav{
-  height: 14%;
-  display: inline-block;
-  background: #19F7DA;
-  color:black;
-  padding: 10px 30px;
-  text-align: center;
-  border-radius: 25%;
-  
-}
+
 
 a{
   text-decoration: none;
@@ -78,14 +69,26 @@ nav {
     padding: 7px;
   }
 
-  .caja_nav{
+.caja_nav{
     display: inline-block;
-    background: #19F7DA;
+    background: #199ef7;
     color:black;
     padding: 10px 30px;
     text-align: center;
     border-radius: 25%;
+    height: 14%;
+    
   }
+  .caja_nav:hover {
+      background: #147cc1; 
+      transform: scale(1.05);
+    }
+    /*Animación al hacer clic*/
+    .caja_nav:active {
+      transform: scale(0.95); /* Reducir el tamaño temporalmente */
+      background: #0f5d90; /* Cambiar el color de fondo */
+    }
+
   footer {
     background-color: #05053e;
     color: white;

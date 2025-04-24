@@ -1,89 +1,87 @@
-<?php  include("db.php");?>
-  
-<?php include("includes/header.php") ;
+<?php  
+include("db.php");
+include("includes/header.php");
 
+// Mensaje de sesión
 if (isset($_SESSION['message'])) { ?>
     <div class="mx-4 my-4 col-lg-4 alert alert-<?= $_SESSION['message_type']?> alert-dismissible fade show" role="alert">
-      <?= $_SESSION['message']?>
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
+        <?= $_SESSION['message'] ?>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
     </div>
-    <?php session_unset(); } ?>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <h2 class="mx-4 my-4 text-center">    PANEL DE CONTROL</h2>
-    <hr>
-    <br>
+    <?php /*session_unset();*/ } ?>
 
-    <div class="d-flex justify-content-center align-items-center mb-5">
-        <canvas id="miGrafico" style="max-width: 80%; height: auto;"></canvas>
-    </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<h2 class="mx-4 my-4 text-center">PANEL DE CONTROL</h2>
+<hr>
 
-    <div>
-    
+<div class="d-flex justify-content-center align-items-center mb-5">
+    <canvas class="my-4 w-100" id="miGrafico" style="max-width: 75%; height: auto;"></canvas>
+</div>
 
-    <div class= "container d-flex justify-content-center align-items-center" style="height: 50vh;">
-        
+<div class="container d-flex justify-content-center align-items-center" style="height: 50vh;">
     <div class="row mb-2">
-    <div class="col-md-6">
-      <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-        <div class="col p-4 d-flex flex-column position-static">
-          <strong class="d-inline-block mb-2 text-primary-emphasis">Demandados</strong>
-          <h3 class="mb-0">Subtitulo 1</h3>
+        <!-- Productos más vendidos -->
+        <div class="col-md-6">
+            <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative" style="background-color: rgba(0, 216, 0, 0.13);">
+                <div class="col p-4 d-flex flex-column position-static">
+                    <strong class="d-inline-block mb-2 text-primary-emphasis">Productos más vendidos</strong>
+                    <ul>
+                        <?php
+                        $sql = "SELECT P.nombreProducto, SUM(V.cantidadVenta) AS total_vendido
+                                FROM ventas V
+                                LEFT JOIN Productos P ON V.productoId = P.idProducto
+                                GROUP BY P.idProducto
+                                ORDER BY total_vendido DESC
+                                LIMIT 7";
+                        $result = $conn->query($sql);
 
-          
-
-          <div class="mb-1 text-body-secondary">Textaco1</div>
-          <p class="card-text mb-auto">Parrafo1.</p>
+                        if ($result && $result->num_rows > 0) {
+                            while ($row = $result->fetch_assoc()) {
+                                echo "<li><strong>{$row['nombreProducto']}</strong>: {$row['total_vendido']} unidades vendidas</li>";
+                            }
+                        } else {
+                            echo "<li>No hay productos vendidos recientemente.</li>";
+                        }
+                        ?>
+                    </ul>
+                </div>
+            </div>
         </div>
-        
-      </div>
-    </div>
-    
-    <div class="col-md-6">
-      <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-        <div class=" col p-4 d-flex flex-column position-static">
+        <!-- Productos con bajo stock -->
+        <div class="col-md-6">
+            <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative" style="background-color: rgba(255, 0, 0, 0.13);">
+                <div class="col p-4 d-flex flex-column position-static">
+                    <strong class="d-inline-block mb-2 text-success-emphasis">Productos con bajo stock</strong>
+                    <ul>
+                        <?php
+                        $sql = "SELECT nombreProducto, cantidad 
+                                FROM Productos 
+                                ORDER BY cantidad ASC 
+                                LIMIT 7";
+                        $result = $conn->query($sql);
 
-        
-
-                    
-          <strong class="d-inline-block mb-2 text-success-emphasis">Bajo Stock</strong>
-
-          <ul>
-                <?php
-                // Consulta para los 7 productos con menor cantidad
-                $sql = "SELECT nombreProducto, cantidad FROM Productos ORDER BY cantidad ASC LIMIT 7";
-                $result = $conn->query($sql);
-
-                if ($result && $result->num_rows > 0) {
-                    while ($row = $result->fetch_assoc()) {
-                        echo "<li><strong>{$row['nombreProducto']}</strong>: {$row['cantidad']} unidades</li>";
-                    }
-                } else {
-                    echo "<li>No hay productos con bajo inventario.</li>";
-                }
-                ?>
-            </ul>
-    
-          <div class="mb-1 text-body-secondary">textico 11</div>
-          <p class="mb-auto">adsf adf adsf asdfffsaf.</p>
-          
+                        if ($result && $result->num_rows > 0) {
+                            while ($row = $result->fetch_assoc()) {
+                                echo "<li><strong>{$row['nombreProducto']}</strong>: {$row['cantidad']} unidades</li>";
+                            }
+                        } else {
+                            echo "<li>No hay productos con bajo inventario.</li>";
+                        }
+                        ?>
+                    </ul>
+                </div>
+            </div>
         </div>
-        
-      </div>
     </div>
-  </div>
+</div>
 
-
-
-
-    </div>
-    </div>      
-
-    <br>
-    <div class="container mt-4" >
+<hr>
+<div class="container mt-2" >
     <form action="dashboard.php" method="POST">
         <div class="form-group">
+            <h3 class='text-center p-2'>CONSULTAR TABLAS</h3>
             <label for="opcion">Selecciona una opción:</label>
             <select class="form-control" id="opcion" name="opcion">
                 <option value="productos">Productos</option>
@@ -96,47 +94,72 @@ if (isset($_SESSION['message'])) { ?>
         <button type="submit" class="btn btn-primary my-4 mx-4">Mostrar</button>
     </form>
 </div>
-<hr>
-<div class="container mt-4">
+<div class="container mt-2">
 
 
-    <?php
+<?php
+
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $opcion = $_POST['opcion'];
-
         if ($opcion == 'productos') {
             // Consulta SQL para Productos con JOIN en Proveedores y Categorías
-        $sql = "SELECT P.idProducto, P.nombreProducto, P.descripcionProducto, P.cantidad, P.precioVenta, P.precioCompra, Pr.nombreProveedor, C.nombreCategoria
-        FROM Productos P
-        LEFT JOIN Proveedores Pr ON P.proveedorId = Pr.idProveedor
-        LEFT JOIN Categorias C ON P.CategoriaId = C.idCategoria";
+            if ($opcion == 'productos') {
+                echo "<form action='dashboard.php' method='POST'>
+                        <input type='hidden' name='opcion' value='productos'>
+                        <div class='form-group'>
+                            <label for='filtro'>Filtrar por (Nombre, proveedor, categoria):</label>
+                            <input type='text' name='filtro' id='filtro' class='form-control' placeholder='Ingresa texto para filtrar'>
+                        </div>
+                        <button type='submit' class='btn btn-primary my-4 mx-4'>Filtrar</button>
+                        </form>";
 
-$result = $conn->query($sql);
-
-if ($result->num_rows > 0) {
-    echo "<h2 class='text-center p-4'>Productos</h2>";
-    echo "<table class='table table-striped table-hover table-responsive'>";
-    echo "<tr class='table-dark text-white'><th>ID</th><th>Nombre</th><th>Descripción</th><th>Cantidad</th><th>Precio Venta</th><th>Precio Compra</th><th>Proveedor</th><th>Categoría</th><th>Acciones</th></tr>";
-    while ($row = $result->fetch_assoc()) {
-        echo "<tr>
-            <td>{$row['idProducto']}</td>
-            <td>{$row['nombreProducto']}</td>
-            <td>{$row['descripcionProducto']}</td>
-            <td>{$row['cantidad']}</td>
-            <td>{$row['precioVenta']}</td>
-            <td>{$row['precioCompra']}</td>
-            <td>{$row['nombreProveedor']}</td>
-            <td>{$row['nombreCategoria']}</td>
-            <td>
-                <a href='edit_producto.php?id={$row['idProducto']}'>Editar</a> |
-                <a style='color:red;' href='delete_producto.php?id={$row['idProducto']}'>Eliminar</a>
-            </td>
-        </tr>";
-    }
-    echo "</table>";
-} else {
-    echo "No hay productos.";
-}
+                // Obtener el texto del filtro desde una entrada del formulario
+                $filtro = isset($_POST['filtro']) ? $_POST['filtro'] : '';
+                $searchTerm = "%" . $filtro . "%"; 
+                // Construir la consulta SQL con filtros dinámicos
+                $sql = "SELECT P.idProducto, P.nombreProducto, P.descripcionProducto, P.cantidad, 
+                               P.precioVenta, P.precioCompra, Pr.nombreProveedor, C.nombreCategoria
+                        FROM Productos P
+                        LEFT JOIN Proveedores Pr ON P.proveedorId = Pr.idProveedor
+                        LEFT JOIN Categorias C ON P.CategoriaId = C.idCategoria
+                        WHERE P.nombreProducto LIKE ?
+                           OR Pr.nombreProveedor LIKE ?
+                           OR C.nombreCategoria LIKE ?";
+            
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param('sss', $searchTerm, $searchTerm, $searchTerm);
+                $stmt->execute();
+                $result = $stmt->get_result();                    
+            
+                if ($result->num_rows > 0) {
+                    echo "<h2 class='text-center p-4'>Productos</h2>";
+                    echo "<table class='table table-striped table-hover table-responsive'>";
+                    echo "<tr class='table-dark text-white'>
+                            <th>ID</th><th>Nombre</th><th>Descripción</th><th>Cantidad</th>
+                            <th>Precio Venta</th><th>Precio Compra</th><th>Proveedor</th>
+                            <th>Categoría</th><th>Acciones</th>
+                          </tr>";
+                    while ($row = $result->fetch_assoc()) {
+                        echo "<tr>
+                                <td>{$row['idProducto']}</td>
+                                <td>{$row['nombreProducto']}</td>
+                                <td>{$row['descripcionProducto']}</td>
+                                <td>{$row['cantidad']}</td>
+                                <td>{$row['precioVenta']}</td>
+                                <td>{$row['precioCompra']}</td>
+                                <td>{$row['nombreProveedor']}</td>
+                                <td>{$row['nombreCategoria']}</td>
+                                <td>
+                                    <a href='edit_producto.php?id={$row['idProducto']}'>Editar</a> |
+                                    <a style='color:red;' href='delete_producto.php?id={$row['idProducto']}'>Eliminar</a>
+                                </td>
+                              </tr>";
+                    }
+                    echo "</table>";
+                } else {
+                    echo "No hay productos que coincidan con el filtro.";
+                }
+            }
         } elseif ($opcion == 'proveedores') {
             $sql = "SELECT * FROM Proveedores";  //consulta SQL para Prouctos
             $result = $conn->query($sql);
@@ -183,7 +206,6 @@ if ($result->num_rows > 0) {
                         <td>{$row['Correo']}</td>
                     </tr>";
                 }
-                
                 echo "</table>";
             } else {
                 echo "No hay datos.";
@@ -221,13 +243,16 @@ if ($result->num_rows > 0) {
         }elseif($opcion == 'ventas') {
 
             $sql = "SELECT V.idVenta, V.fechaVenta, P.nombreProducto, V.cantidadVenta, V.precioVentaTotal, Vd.nombreCompleto
-                    FROM ventas V
-                    LEFT JOIN Productos P ON V.productoId = P.idProducto
-                    LEFT JOIN usuario Vd ON V.vendedorId = Vd.idUsuario";
+        FROM ventas V
+        LEFT JOIN Productos P ON V.productoId = P.idProducto
+        LEFT JOIN usuario Vd ON V.vendedorId = Vd.idUsuario
+        ORDER BY V.idVenta DESC
+        LIMIT 10"; // Mostrar últimas 10 ventas
             $result = $conn->query($sql);
     
             if ($result->num_rows > 0) {
                 echo "<h2 class='text-center p-4'>Ventas</h2>";
+                echo "<h5 class='text-center p-1'>Ultimas 10 ventas</h5>";
                 echo "<table class='table table-striped table-hover table-responsive'>";
                 echo "<tr class='table-dark text-white'><th>ID Venta</th><th>Fecha</th><th>Producto</th><th>Cantidad Vendida</th><th>Precio Venta</th><th>Usuario</th><th>Acciones</th></tr>";
 
@@ -276,10 +301,10 @@ if ($result) {
     }
 }
 
-// Convertir datos para el gráfico
+// Convertir datos para el grafico
 $ventas = array_values($ventas);
-
     ?>
+    
 </div>
 <script>
     //Configuración del gráfico

@@ -7,7 +7,6 @@ $conn = mysqli_connect(
     '1025',
     'inventario'
 );
-
 if ($conn->connect_error) {
     die("Conexión fallida: " . $conn->connect_error);
 }
