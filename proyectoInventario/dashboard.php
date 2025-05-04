@@ -1,341 +1,321 @@
-<?php  
-include("db.php");
+<?php
+// Incluir conexión y funciones de query (ajusta la ruta si es necesario)
+require_once("db.php");
+require_once("queries/dashboard_querie.php");
+// require_once("queries/product_queries.php"); // Si separas más las queries
+// require_once("queries/provider_queries.php"); // etc.
+
+// Iniciar sesión si no está iniciada (importante para los mensajes flash)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Incluir cabecera HTML
 include("includes/header.php");
 
-// Mensaje de sesión
-if (isset($_SESSION['message'])) { ?>
-    <div class="mx-4 my-4 col-lg-4 alert alert-<?= $_SESSION['message_type']?> alert-dismissible fade show" role="alert">
-        <?= $_SESSION['message'] ?>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-    <?php /*session_unset();*/ } ?>
+// --- Obtener Datos para el Dashboard (Widgets y Gráfico) ---
+$topSellingProducts = getTopSellingProducts($conn, 7);
+$lowStockProducts = getLowStockProducts($conn, 7);
+$chartData = getSalesDataForChart($conn, 5); // Últimos 5 días
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<h2 class="mx-4 my-4 text-center">PANEL DE CONTROL</h2>
-<hr>
+// --- Lógica para Mostrar Tablas (si se envió el formulario) ---
+$selectedOption = '';
+$tableHtml = ''; // Variable para almacenar el HTML de la tabla a mostrar
 
-<div class="d-flex justify-content-center align-items-center mb-5">
-    <canvas class="my-4 w-100" id="miGrafico" style="max-width: 75%; height: auto;"></canvas>
-</div>
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['opcion'])) {
+    $selectedOption = $_POST['opcion'];
+    $tableData = false;
+    $tableHeaders = [];
+    $actionLinks = []; // Para configurar enlaces Editar/Eliminar
 
-<div class="container d-flex justify-content-center align-items-center" style="height: 50vh;">
-    <div class="row mb-2">
-        <!-- Productos más vendidos -->
-        <div class="col-md-6">
-            <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative" style="background-color: rgba(0, 216, 0, 0.13);">
-                <div class="col p-4 d-flex flex-column position-static">
-                    <strong class="d-inline-block mb-2 text-primary-emphasis">Productos más vendidos</strong>
-                    <ul>
-                        <?php
-                        $sql = "SELECT P.nombreProducto, SUM(V.cantidadVenta) AS total_vendido
-                                FROM ventas V
-                                LEFT JOIN Productos P ON V.productoId = P.idProducto
-                                GROUP BY P.idProducto
-                                ORDER BY total_vendido DESC
-                                LIMIT 7";
-                        $result = $conn->query($sql);
+    // Determinar qué tabla mostrar
+    switch ($selectedOption) {
+        case 'productos':
+            $filter = isset($_POST['filtro']) ? $_POST['filtro'] : '';
+            $tableData = getFilteredProducts($conn, $filter);
+            $tableHeaders = ['ID', 'Nombre', 'Descripción', 'Cantidad', 'Precio Venta', 'Precio Compra', 'Proveedor', 'Categoría', 'Acciones'];
+            $actionLinks = [ // Configura cómo generar los enlaces de acción
+                'edit_url' => 'edit_producto.php?id=',
+                'delete_url' => 'delete_producto.php?id=',
+                'id_column' => 'idProducto' // Nombre de la columna que contiene el ID
+            ];
+            // Formulario de filtro específico para productos
+            echo "<div class='container mt-2'><form action='dashboard.php' method='POST'>";
+            echo "<input type='hidden' name='opcion' value='productos'>";
+            echo "<div class='form-group'>";
+            echo "<label for='filtro'>Filtrar por (Nombre, proveedor, categoria):</label>";
+            echo "<input type='text' name='filtro' id='filtro' class='form-control' placeholder='Ingresa texto para filtrar' value='" . htmlspecialchars($filter) . "'>";
+            echo "</div>";
+            echo "<button type='submit' class='btn btn-secondary my-2'>Filtrar Productos</button>";
+            echo "</form></div>";
+            break;
 
-                        if ($result && $result->num_rows > 0) {
-                            while ($row = $result->fetch_assoc()) {
-                                echo "<li><strong>{$row['nombreProducto']}</strong>: {$row['total_vendido']} unidades vendidas</li>";
-                            }
-                        } else {
-                            echo "<li>No hay productos vendidos recientemente.</li>";
-                        }
-                        ?>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <!-- Productos con bajo stock -->
-        <div class="col-md-6">
-            <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative" style="background-color: rgba(255, 0, 0, 0.13);">
-                <div class="col p-4 d-flex flex-column position-static">
-                    <strong class="d-inline-block mb-2 text-success-emphasis">Productos con bajo stock</strong>
-                    <ul>
-                        <?php
-                        $sql = "SELECT nombreProducto, cantidad 
-                                FROM Productos 
-                                ORDER BY cantidad ASC 
-                                LIMIT 7";
-                        $result = $conn->query($sql);
+        case 'proveedores':
+            $tableData = getAllProviders($conn);
+            $tableHeaders = ['ID', 'Nombre', 'Descripción', 'Dirección', 'Teléfono', 'Correo', 'Info Adicional', 'Acciones'];
+             $actionLinks = [
+                'edit_url' => 'edit_proveedor.php?id=',
+                'delete_url' => 'delete_proveedor.php?id=',
+                'id_column' => 'idProveedor'
+            ];
+            break;
 
-                        if ($result && $result->num_rows > 0) {
-                            while ($row = $result->fetch_assoc()) {
-                                echo "<li><strong>{$row['nombreProducto']}</strong>: {$row['cantidad']} unidades</li>";
-                            }
-                        } else {
-                            echo "<li>No hay productos con bajo inventario.</li>";
-                        }
-                        ?>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+        case 'ambos':
+            $tableData = getProductsWithProviders($conn);
+            $tableHeaders = ['Producto', 'Cantidad', 'Proveedor', 'Teléfono Prov.', 'Correo Prov.'];
+            // No hay acciones CRUD directas en esta vista combinada
+            break;
 
-<hr>
-<div class="container mt-2" >
-    <form action="dashboard.php" method="POST">
-        <div class="form-group">
-            <h3 class='text-center p-2'>CONSULTAR TABLAS</h3>
-            <label for="opcion">Selecciona una opción:</label>
-            <select class="form-control" id="opcion" name="opcion">
-                <option value="productos">Productos</option>
-                <option value="proveedores">Proveedores</option>
-                <option value="ambos">Productos y Proveedores</option>
-                <option value="entradas">Entradas de Productos</option>
-                <option value="ventas">Ventas</option>
-            </select> 
-        </div>
-        <button type="submit" class="btn btn-primary my-4 mx-4">Mostrar</button>
-    </form>
-</div>
-<div class="container mt-2">
+        case 'entradas':
+            $tableData = getAllEntries($conn);
+            $tableHeaders = ['ID', 'Fecha', 'Producto', 'Cant. Comprada', 'Precio Compra U.', 'Proveedor', 'Acciones'];
+            $actionLinks = [
+                'edit_url' => 'edit_entrada.php?id=',
+                'delete_url' => 'delete_entrada.php?id=',
+                'id_column' => 'idEntrada'
+            ];
+            break;
+
+        case 'ventas':
+            $tableData = getRecentSales($conn, 10); // Obtener últimas 10
+            $tableHeaders = ['ID', 'Fecha', 'Producto', 'Cant. Vendida', 'Precio Venta T.', 'Vendedor', 'Acciones'];
+             $actionLinks = [
+                'edit_url' => 'edit_venta.php?id=',
+                'delete_url' => 'delete_Venta.php?id=', // Cuidado con mayúscula Venta
+                'id_column' => 'idVenta'
+            ];
+            break;
+    }
+
+    // Generar HTML de la tabla si hay datos
+    if ($tableData !== false && !empty($tableData)) {
+        $tableHtml = generateHtmlTable($tableData, $tableHeaders, $actionLinks);
+    } elseif ($tableData !== false && empty($tableData)) {
+        $tableHtml = "<p class='text-center my-4'>No hay datos para mostrar para la opción '" . htmlspecialchars($selectedOption) . "'.</p>";
+    } else {
+         $tableHtml = "<p class='text-center my-4 text-danger'>Error al obtener los datos para '" . htmlspecialchars($selectedOption) . "'.</p>";
+    }
+}
 
 
-<?php
+/**
+ * Función auxiliar para generar una tabla HTML a partir de un array de datos.
+ *
+ * @param array $data Array de arrays asociativos con los datos.
+ * @param array $headers Array con los nombres de las columnas para el encabezado.
+ * @param array $actions Configuración para los enlaces de acción ['edit_url', 'delete_url', 'id_column'].
+ * @return string El HTML de la tabla.
+ */
+function generateHtmlTable(array $data, array $headers, array $actions = []): string
+{
+    if (empty($data)) return '';
 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $opcion = $_POST['opcion'];
-        if ($opcion == 'productos') {
-            // Consulta SQL para Productos con JOIN en Proveedores y Categorías
-            if ($opcion == 'productos') {
-                echo "<form action='dashboard.php' method='POST'>
-                        <input type='hidden' name='opcion' value='productos'>
-                        <div class='form-group'>
-                            <label for='filtro'>Filtrar por (Nombre, proveedor, categoria):</label>
-                            <input type='text' name='filtro' id='filtro' class='form-control' placeholder='Ingresa texto para filtrar'>
-                        </div>
-                        <button type='submit' class='btn btn-primary my-4 mx-4'>Filtrar</button>
-                        </form>";
+    $html = "<h2 class='text-center p-4'>" . htmlspecialchars(ucfirst($headers[0] ?? 'Datos')) . "</h2>"; // Título aproximado
+     // Ajuste para título específico de 'ambos' y 'ventas'
+    if (isset($_POST['opcion']) && $_POST['opcion'] == 'ambos') $html = "<h2 class='text-center p-4'>Productos y Proveedores</h2>";
+    if (isset($_POST['opcion']) && $_POST['opcion'] == 'ventas') $html .= "<h5 class='text-center p-1'>Últimas 10 ventas</h5>";
 
-                // Obtener el texto del filtro desde una entrada del formulario
-                $filtro = isset($_POST['filtro']) ? $_POST['filtro'] : '';
-                $searchTerm = "%" . $filtro . "%"; 
-                // Construir la consulta SQL con filtros dinámicos
-                $sql = "SELECT P.idProducto, P.nombreProducto, P.descripcionProducto, P.cantidad, 
-                               P.precioVenta, P.precioCompra, Pr.nombreProveedor, C.nombreCategoria
-                        FROM Productos P
-                        LEFT JOIN Proveedores Pr ON P.proveedorId = Pr.idProveedor
-                        LEFT JOIN Categorias C ON P.CategoriaId = C.idCategoria
-                        WHERE P.nombreProducto LIKE ?
-                           OR Pr.nombreProveedor LIKE ?
-                           OR C.nombreCategoria LIKE ?";
-            
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param('sss', $searchTerm, $searchTerm, $searchTerm);
-                $stmt->execute();
-                $result = $stmt->get_result();                    
-            
-                if ($result->num_rows > 0) {
-                    echo "<h2 class='text-center p-4'>Productos</h2>";
-                    echo "<table class='table table-striped table-hover table-responsive'>";
-                    echo "<tr class='table-dark text-white'>
-                            <th>ID</th><th>Nombre</th><th>Descripción</th><th>Cantidad</th>
-                            <th>Precio Venta</th><th>Precio Compra</th><th>Proveedor</th>
-                            <th>Categoría</th><th>Acciones</th>
-                          </tr>";
-                    while ($row = $result->fetch_assoc()) {
-                        echo "<tr>
-                                <td>{$row['idProducto']}</td>
-                                <td>{$row['nombreProducto']}</td>
-                                <td>{$row['descripcionProducto']}</td>
-                                <td>{$row['cantidad']}</td>
-                                <td>{$row['precioVenta']}</td>
-                                <td>{$row['precioCompra']}</td>
-                                <td>{$row['nombreProveedor']}</td>
-                                <td>{$row['nombreCategoria']}</td>
-                                <td>
-                                    <a href='edit_producto.php?id={$row['idProducto']}'>Editar</a> |
-                                    <a style='color:red;' href='delete_producto.php?id={$row['idProducto']}'>Eliminar</a>
-                                </td>
-                              </tr>";
-                    }
-                    echo "</table>";
-                } else {
-                    echo "No hay productos que coincidan con el filtro.";
-                }
-            }
-        } elseif ($opcion == 'proveedores') {
-            $sql = "SELECT * FROM Proveedores";  //consulta SQL para Prouctos
-            $result = $conn->query($sql);
-            if ($result->num_rows > 0) {
-                echo "<h2 class='text-center p-4'>Proveedores</h2>";
-                echo "<table class='table table-striped table-hover table-responsive''>";
-                echo "<tr class='table-dark text-white'><th>ID</th><th>Nombre</th><th>Descripción</th><th>Dirección</th><th>Teléfono</th><th>Correo</th><th>Información Adicional</th><th>Acciones</th></tr>";
-                while ($row = $result->fetch_assoc()) {
-                    echo "<tr>
-                        <td>{$row['idProveedor']}</td>
-                        <td>{$row['nombreProveedor']}</td>
-                        <td>{$row['descripcionProveedor']}</td>
-                        <td>{$row['direccionProveedor']}</td>
-                        <td>{$row['telefono']}</td>
-                        <td>{$row['Correo']}</td>
-                        <td>{$row['infoAdicional']}</td>
-                        <td>
-                            <a href='edit_proveedor.php?id={$row['idProveedor']}'>Editar</a> |
-                            <a href='delete_proveedor.php?id={$row['idProveedor']}'>Eliminar</a>
-                        </td>
-                    </tr>";
-                }
-                echo "</table>";
+    $html .= "<div class='table-responsive'><table class='table table-striped table-hover'>"; // table-responsive para tablas anchas
+    $html .= "<thead class='table-dark'><tr>"; // thead con clase oscura
+
+    // Generar encabezados
+    foreach ($headers as $header) {
+        $html .= "<th>" . htmlspecialchars($header) . "</th>";
+    }
+    $html .= "</tr></thead><tbody>";
+
+    // Generar filas de datos
+    $dataKeys = array_keys($data[0]); // Obtener las claves del primer elemento para el orden
+    foreach ($data as $row) {
+        $html .= "<tr>";
+        foreach ($dataKeys as $key) {
+             // Formato especial para precios (si existen esas columnas)
+            if (str_contains(strtolower($key), 'precio')) {
+                 $html .= "<td>$" . number_format($row[$key] ?? 0, 2, ',', '.') . "</td>";
             } else {
-                echo "No hay proveedores.";
-            }
-
-        } elseif ($opcion == 'ambos') {
-            $sql = "SELECT P.nombreProducto, P.cantidad, Pr.nombreProveedor, Pr.telefono, Pr.Correo 
-                    FROM Productos P 
-                    INNER JOIN Proveedores Pr ON P.proveedorId = Pr.idProveedor"; //consulta SQL para Unir Prouctos con proveedores
-            $result = $conn->query($sql);
-
-            if ($result->num_rows > 0) {
-                echo "<h2 class='text-center p-4'>Productos y Proveedores</h2>";
-                echo "<table class='table table-striped table-hover table-responsive'>";
-                echo "<tr class='table-dark text-white'><th>Nombre del Producto</th><th>Cantidad</th><th>Nombre del Proveedor</th><th>Teléfono</th><th>Correo</th></tr>";
-                while ($row = $result->fetch_assoc()) {
-                    echo "<tr>
-                        <td>{$row['nombreProducto']}</td>
-                        <td>{$row['cantidad']}</td>
-                        <td>{$row['nombreProveedor']}</td>
-                        <td>{$row['telefono']}</td>
-                        <td>{$row['Correo']}</td>
-                    </tr>";
-                }
-                echo "</table>";
-            } else {
-                echo "No hay datos.";
-            }
-        }elseif ($opcion == 'entradas') {
-            $sql = "SELECT E.idEntrada, E.fechaEntrada, P.nombreProducto, E.cantidadComprada, E.precioCompraUnidad, Pr.nombreProveedor
-                    FROM EntradaProductos E
-                    LEFT JOIN Productos P ON E.productoId = P.idProducto
-                    LEFT JOIN Proveedores Pr ON E.proveedorId = Pr.idProveedor";
-            $result = $conn->query($sql);
-    
-            if ($result->num_rows > 0) {
-                echo "<h2 class='text-center p-4'>Entradas</h2>";
-                echo "<table class='table table-striped table-hover table-responsive'>";
-                echo "<tr class='table-dark text-white'><th>ID Entrada</th><th>Fecha</th><th>Producto</th><th>Cantidad Comprada</th><th>Precio Compra Unidad</th><th>Proveedor</th><th>Acciones</th></tr>";
-                while ($row = $result->fetch_assoc()) {
-                    echo "<tr>
-                        <td>{$row['idEntrada']}</td>
-                        <td>{$row['fechaEntrada']}</td>
-                        <td>{$row['nombreProducto']}</td>
-                        <td>{$row['cantidadComprada']}</td>
-                        <td>{$row['precioCompraUnidad']}</td>
-                        <td>{$row['nombreProveedor']}</td>
-                        <td>
-                            <a href='edit_entrada.php?id={$row['idEntrada']}'>Editar</a> |
-                            <a style='color:red;' href='delete_entrada.php?id={$row['idEntrada']}'>Eliminar</a>
-                        </td>
-                    </tr>";
-                }
-                echo "</table>";
-            } else {
-                echo "No hay entradas.";
-            }
-
-        }elseif($opcion == 'ventas') {
-
-            $sql = "SELECT V.idVenta, V.fechaVenta, P.nombreProducto, V.cantidadVenta, V.precioVentaTotal, Vd.nombreCompleto
-        FROM ventas V
-        LEFT JOIN Productos P ON V.productoId = P.idProducto
-        LEFT JOIN usuario Vd ON V.vendedorId = Vd.idUsuario
-        ORDER BY V.idVenta DESC
-        LIMIT 10"; // Mostrar últimas 10 ventas
-            $result = $conn->query($sql);
-    
-            if ($result->num_rows > 0) {
-                echo "<h2 class='text-center p-4'>Ventas</h2>";
-                echo "<h5 class='text-center p-1'>Ultimas 10 ventas</h5>";
-                echo "<table class='table table-striped table-hover table-responsive'>";
-                echo "<tr class='table-dark text-white'><th>ID Venta</th><th>Fecha</th><th>Producto</th><th>Cantidad Vendida</th><th>Precio Venta</th><th>Usuario</th><th>Acciones</th></tr>";
-
-                while ($row = $result->fetch_assoc()) {
-                    echo "<tr>
-                        <td>{$row['idVenta']}</td>
-                        <td>{$row['fechaVenta']}</td>
-                        <td>{$row['nombreProducto']}</td>
-                        <td>{$row['cantidadVenta']}</td>
-                        <td>{$row['precioVentaTotal']}</td>
-                        <td>{$row['nombreCompleto']}</td>
-                        <td>
-                            <a href='edit_venta.php?id={$row['idVenta']}'>Editar</a> |
-                            <a style='color:red;' href='delete_Venta.php?id={$row['idVenta']}'>Eliminar</a>
-                        </td>
-                    </tr>";
-                }
-                echo "</table>";
-            } else {
-                echo "No hay entradas.";
+                $html .= "<td>" . htmlspecialchars($row[$key] ?? '') . "</td>";
             }
         }
+
+        // Añadir acciones si están configuradas
+        if (!empty($actions) && isset($row[$actions['id_column']])) {
+            $id = $row[$actions['id_column']];
+            $html .= "<td>";
+            if (isset($actions['edit_url'])) {
+                $html .= "<a href='" . htmlspecialchars($actions['edit_url'] . $id) . "' class='btn btn-sm btn-warning me-1'>Editar</a>"; // Botón Editar
+            }
+            if (isset($actions['delete_url'])) {
+                 // Añadir confirmación JS al eliminar
+                $html .= "<a href='" . htmlspecialchars($actions['delete_url'] . $id) . "' class='btn btn-sm btn-danger' onclick='return confirm(\"¿Estás seguro de que quieres eliminar este registro?\");'>Eliminar</a>"; // Botón Eliminar
+            }
+            $html .= "</td>";
+        } elseif (!empty($actions)) { // Si se esperan acciones pero no hay columna ID
+             $html .= "<td></td>";
+        }
+
+        $html .= "</tr>";
     }
 
-    $fechas = [];
-for ($i = 4; $i >= 0; $i--) {
-    $fechas[] = date('Y-m-d', strtotime("-$i days"));
+    $html .= "</tbody></table></div>";
+    return $html;
 }
 
-// Convierte el arreglo de fechas en una cadena para la consulta SQL
-$fechasString = "'" . implode("', '", $fechas) . "'";
+?>
 
-// Consulta SQL con suma de ventas por fecha
-$sql = "SELECT DATE(V.fechaVenta) AS fecha, SUM(V.precioVentaTotal) AS total_ventas
-        FROM ventas V
-        WHERE DATE(V.fechaVenta) IN ($fechasString)
-        GROUP BY DATE(V.fechaVenta)
-        ORDER BY DATE(V.fechaVenta) ASC";
-$result = $conn->query($sql);
-
-// Procesar resultados
-$ventas = array_fill_keys($fechas, 0); // Inicializar ventas en 0 para todas las fechas
-if ($result) {
-    while ($row = $result->fetch_assoc()) {
-        $ventas[$row['fecha']] = $row['total_ventas'];
-    }
-}
-
-// Convertir datos para el grafico
-$ventas = array_values($ventas);
+<?php if (isset($_SESSION['message'])) : ?>
+    <div class="container mt-3">
+        <div class="alert alert-<?= htmlspecialchars($_SESSION['message_type']) ?> alert-dismissible fade show" role="alert">
+            <?= htmlspecialchars($_SESSION['message']) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> </div>
+    </div>
+    <?php
+    // Limpiar mensaje de sesión después de mostrarlo
+    unset($_SESSION['message']);
+    unset($_SESSION['message_type']);
     ?>
-    
-</div>
+<?php endif; ?>
+
+
+<div class="container">
+    <h2 class="mx-0 my-4 text-center">PANEL DE CONTROL</h2>
+    <hr>
+
+    <div class="d-flex justify-content-center align-items-center mb-5">
+        <canvas class="my-4 w-100" id="miGrafico" style="max-width: 75%; height: auto;"></canvas>
+    </div>
+
+    <div class="row mb-4 justify-content-center">
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm h-100" style="background-color: rgba(0, 216, 0, 0.1);">
+                 <div class="card-body d-flex flex-column">
+                    <strong class="d-block mb-2 text-primary-emphasis">Productos más vendidos</strong>
+                    <ul class="list-unstyled mb-0">
+                        <?php if ($topSellingProducts === false) : ?>
+                            <li>Error al cargar datos.</li>
+                        <?php elseif (!empty($topSellingProducts)) : ?>
+                            <?php foreach ($topSellingProducts as $product) : ?>
+                                <li>
+                                    <strong><?= htmlspecialchars($product['nombreProducto']) ?></strong>:
+                                    <?= htmlspecialchars($product['total_vendido']) ?> unidades
+                                </li>
+                            <?php endforeach; ?>
+                        <?php else : ?>
+                            <li>No hay productos vendidos recientemente.</li>
+                        <?php endif; ?>
+                    </ul>
+                 </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm h-100" style="background-color: rgba(255, 0, 0, 0.1);">
+                <div class="card-body d-flex flex-column">
+                    <strong class="d-block mb-2 text-danger-emphasis">Productos con bajo stock</strong>
+                     <ul class="list-unstyled mb-0">
+                       <?php if ($lowStockProducts === false) : ?>
+                            <li>Error al cargar datos.</li>
+                        <?php elseif (!empty($lowStockProducts)) : ?>
+                            <?php foreach ($lowStockProducts as $product) : ?>
+                                <li>
+                                    <strong><?= htmlspecialchars($product['nombreProducto']) ?></strong>:
+                                    <?= htmlspecialchars($product['cantidad']) ?> unidades
+                                 </li>
+                            <?php endforeach; ?>
+                        <?php else : ?>
+                            <li>No hay productos con bajo inventario.</li>
+                        <?php endif; ?>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div> <hr>
+
+    <div class="container mt-4 mb-3">
+        <form action="dashboard.php" method="POST">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6">
+                    <h3 class='text-center p-2'>CONSULTAR TABLAS</h3>
+                    <div class="form-group mb-3">
+                        <label for="opcion" class="form-label">Selecciona una tabla para mostrar:</label>
+                        <select class="form-select" id="opcion" name="opcion">
+                            <option value="productos" <?= ($selectedOption == 'productos') ? 'selected' : '' ?>>Productos</option>
+                            <option value="proveedores" <?= ($selectedOption == 'proveedores') ? 'selected' : '' ?>>Proveedores</option>
+                            <option value="ambos" <?= ($selectedOption == 'ambos') ? 'selected' : '' ?>>Productos y Proveedores</option>
+                            <option value="entradas" <?= ($selectedOption == 'entradas') ? 'selected' : '' ?>>Entradas de Productos</option>
+                            <option value="ventas" <?= ($selectedOption == 'ventas') ? 'selected' : '' ?>>Ventas</option>
+                        </select>
+                    </div>
+                     <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Mostrar Tabla</button>
+                     </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="container mt-2">
+        <?php
+        // Mostrar el HTML de la tabla generado previamente
+        echo $tableHtml;
+        ?>
+    </div>
+
+</div> <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    //Configuración del gráfico
-    const ctx = document.getElementById('miGrafico').getContext('2d');
+    const ctx = document.getElementById('miGrafico')?.getContext('2d'); // Añadir ? por si el canvas no existe
+    if (ctx) { // Solo intentar crear el gráfico si el contexto existe
+        const labels = <?= json_encode($chartData['labels'] ?? []) ?>;
+        const data = <?= json_encode($chartData['data'] ?? []) ?>;
 
-    const labels = <?= json_encode($fechas) ?>;
-    const data = <?= json_encode($ventas) ?>;
+        const miGrafico = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Ventas Últimos 5 Días ($)', // Etiqueta más descriptiva
+                    data: data,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.1 // Suavizar un poco la línea
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true, // Puedes ajustarlo si necesitas otras dimensiones
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                             // Formato de moneda para el eje Y
+                            callback: function(value, index, values) {
+                                return '$' + value.toLocaleString('es-CO'); // Formato colombiano
+                            }
+                        }
+                    }
+                },
+                 plugins: {
+                    tooltip: {
+                         callbacks: {
+                             label: function(context) {
+                                 let label = context.dataset.label || '';
+                                 if (label) {
+                                     label += ': ';
+                                 }
+                                 if (context.parsed.y !== null) {
+                                     // Formato de moneda en el tooltip
+                                     label += '$' + context.parsed.y.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                 }
+                                 return label;
+                             }
+                         }
+                    }
+                 }
+            }
+        });
+    } else {
+        console.error("No se pudo encontrar el contexto del canvas 'miGrafico'.");
+    }
+</script>
 
-    const miGrafico = new Chart(ctx, {
-      type: 'line', // Tipo de gráfico
-      data: {
-        labels: labels, // Fechas en el eje X
-        datasets: [{
-          label: 'Ultimos 5 dias',
-
-          data: data, // Valores de ventas
-          borderColor: 'rgba(75, 192, 192, 1)', // Color de la línea
-          backgroundColor: 'rgba(75, 192, 192, 0.2)', // Color de fondo debajo de la línea
-          borderWidth: 2,
-          fill: true // Relleno debajo de la línea
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true
-          }
-        }
-      }
-    });
-  </script>
-
-<?php  include("includes/footer.php") ?>
+<?php include("includes/footer.php") // Incluir pie de página HTML ?>
