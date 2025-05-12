@@ -9,7 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // --- Obtener los productos ---
 $productos = [];
-// ***** CORRECCIÓN AQUÍ: Incluir precioVenta en la consulta *****
+
 $query_productos = "SELECT idProducto, nombreProducto, precioVenta FROM Productos ORDER BY nombreProducto ASC";
 $result_productos_query = mysqli_query($conn, $query_productos);
 
@@ -30,7 +30,6 @@ if ($result_usuarios_query) {
     $usuarios = mysqli_fetch_all($result_usuarios_query, MYSQLI_ASSOC);
 } else {
     error_log("Error al obtener usuarios: " . mysqli_error($conn));
-    // Considera si este error también debe ser crítico para el usuario
 }
 
 // Incluye el encabezado de la página

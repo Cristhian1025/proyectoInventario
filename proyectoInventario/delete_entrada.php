@@ -3,7 +3,6 @@ include("db.php");
 
 if (isset($_GET['id'])) {
     $idEntrada = $_GET['id'];
-
     // Obtener la cantidad comprada y el producto ID antes de eliminar
     $query = "SELECT cantidadComprada, productoId FROM EntradaProductos WHERE idEntrada = $idEntrada";
     $result = mysqli_query($conn, $query);

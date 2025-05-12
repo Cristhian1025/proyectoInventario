@@ -1,25 +1,50 @@
 <?php
 session_start(); // Inicia o reanuda una sesión existente
-include("db.php");
+require_once("db.php"); // Incluye el archivo de conexión a la base de datos
 
 if (isset($_POST["login"])) {
-    $nombreUsuario = $_POST["usuario"];
-    $contrasenia = $_POST["contrasenia"];
+    // Limpiamos los datos de entrada para prevenir inyección SQL
+    $nombreUsuario = trim($_POST["usuario"]);
+    $contrasenia = trim($_POST["contrasenia"]);
 
-    $sql = "SELECT * FROM Usuario WHERE nombreUsuario = ? AND contrasenia = ?";
+    // Verificamos que los campos no estén vacíos
+    if (empty($nombreUsuario) || empty($contrasenia)) {
+        $_SESSION['message'] = 'Por favor, completa todos los campos';
+        $_SESSION['message_type'] = 'warning';
+        header("Location: index.php");
+        exit();
+    }
+
+    // 1. Consulta para obtener el usuario por nombre de usuario
+    $sql = "SELECT * FROM Usuario WHERE nombreUsuario = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ss", $nombreUsuario, $contrasenia);
+    $stmt->bind_param("s", $nombreUsuario);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    if ($result->num_rows > 0) { // Credenciales correctas
-        $_SESSION['nombreUsuario'] = $nombreUsuario; // Guarda el nombre de usuario en la sesión
-        header("Location: dashboard.php"); // Redirige al dashboard
-        exit();
-    } else { // Credenciales incorrectas
-        $_SESSION['message'] = 'Credenciales incorrectas'; // Almacena el mensaje de error en la sesión
-        $_SESSION['message_type'] = 'danger'; // Tipo de mensaje
-        header("Location: index.php"); // Redirige al inicio de sesión
+    if ($result->num_rows === 1) { // Usuario encontrado
+        $usuario = $result->fetch_assoc(); // Obtiene los datos del usuario
+        $contrasena_hash = trim($usuario["contrasenia"]); // Obtiene la contraseña hasheada y elimina espacios
+
+        // 2. Verificar la contraseña hasheada
+        if (password_verify($contrasenia, $contrasena_hash)) {
+            // Contraseña válida: iniciar sesión
+            $_SESSION['id_usuario'] = $usuario['tipoUsuario'];
+            $_SESSION['nombreUsuario'] = $nombreUsuario;
+            header("Location: dashboard.php"); // Redirige al dashboard
+            exit();
+        } else {
+            // Contraseña inválida: error
+            $_SESSION['message'] = 'Credenciales incorrectas';
+            $_SESSION['message_type'] = 'danger';
+            header("Location: index.php");
+            exit();
+        }
+    } else {
+        // Usuario no encontrado: error
+        $_SESSION['message'] = 'Usuario no encontrado';
+        $_SESSION['message_type'] = 'danger';
+        header("Location: index.php");
         exit();
     }
 
