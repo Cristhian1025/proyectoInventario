@@ -1,4 +1,9 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
 include("db.php");
 
 if (isset($_POST['save_venta'])) {
@@ -58,5 +63,5 @@ if (isset($_POST['save_venta'])) {
 
     header("Location: dashboard.php");
 }
+echo "No se recibió ninguna solicitud válida.";
 ?>
-

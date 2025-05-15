@@ -178,7 +178,7 @@ function getLowStockProducts(mysqli $conn, int $limit = 7): array|false
     return $products;
 }
 
-function getSalesDataForChart(mysqli $conn, int $days = 5): array
+function getSalesDataForChart(mysqli $conn, int $days): array
 {
     // ... (código de getSalesDataForChart sin cambios, ya que no se pagina) ...
     $labels = [];

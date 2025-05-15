@@ -87,7 +87,7 @@ if (!empty($selectedOption)) {
             } else {
                  $tableHtml = "<p class='text-center my-4'>No hay datos para mostrar para la opción '" . htmlspecialchars($selectedOption) . "'.</p>";
             }
-        } else { // Hay registros totales, pero no en esta página (podría pasar si se manipula la URL)
+        } else { // Hay registros totales, pero no en esta página -> podría pasar si se manipula la URL)
             $tableHtml = "<p class='text-center my-4'>No hay datos para mostrar en esta página.</p>";
             $baseParams = ['opcion' => $selectedOption];
             if ($selectedOption == 'productos' && !empty($filterValue)) {
@@ -103,7 +103,16 @@ if (!empty($selectedOption)) {
 // --- Obtener Datos para Widgets y Gráfico (Siempre se cargan) ---
 $topSellingProducts = getTopSellingProducts($conn, 7);
 $lowStockProducts = getLowStockProducts($conn, 7);
-$chartData = getSalesDataForChart($conn, 5);
+//$chartData = getSalesDataForChart($conn, 8);
+
+//Rangos de diass
+$days = isset($_GET['days']) ? (int)$_GET['days'] : 5;
+$daysOptions = [5, 7, 10, 20];
+if (!in_array($days, $daysOptions)) {
+    $days = 5; // fallback
+}
+$chartData = getSalesDataForChart($conn, $days);
+
 
 // --- Función para generar Tabla HTML (sin cambios) ---
 function generateHtmlTable(array $data, array $headers, array $actions = []): string
@@ -221,6 +230,19 @@ function generatePaginationLinks(int $currentPage, int $totalPages, array $baseP
     <h2 class="mx-0 my-4 text-center">PANEL DE CONTROL</h2>
     <hr>
     <div class="d-flex justify-content-center align-items-center mb-5">
+
+    
+    <form method="GET" class="mb-3">
+    <label for="days" class="form-label">Ventas de los últimos:</label>
+    <select name="days" id="days" class="form-select w-auto" style="background-color: rgba(70, 180, 180, 0.3)" onchange="this.form.submit()">
+        <option value="5"  <?= $days == 5 ? 'selected' : '' ?>>5 días</option>
+        <option value="7"  <?= $days == 7 ? 'selected' : '' ?>>7 días</option>
+        <option value="10" <?= $days == 10 ? 'selected' : '' ?>>10 días</option>
+        <option value="20" <?= $days == 20 ? 'selected' : '' ?>>20 días</option>
+    </select>
+</form>
+
+
         <canvas class="my-4 w-100" id="miGrafico" style="max-width: 75%; height: auto;"></canvas>
     </div>
     <div class="row mb-4 justify-content-center">
@@ -298,17 +320,100 @@ function generatePaginationLinks(int $currentPage, int $totalPages, array $baseP
              echo $paginationHtml; // Mostrar enlaces de paginación
         }
         ?>
+        
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    const dias = <?php echo $days?>;
     const ctx = document.getElementById('miGrafico')?.getContext('2d');
     if (ctx) {
         const labels = <?= json_encode($chartData['labels'] ?? []) ?>;
         const data = <?= json_encode($chartData['data'] ?? []) ?>;
-        const miGrafico = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: 'Ventas Últimos 5 Días ($)', data: data, borderColor: 'rgba(75, 192, 192, 1)', backgroundColor: 'rgba(75, 192, 192, 0.2)', borderWidth: 2, fill: true, tension: 0.1 }] }, options: { responsive: true, maintainAspectRatio: true, scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return '$' + value.toLocaleString('es-CO'); } } } }, plugins: { tooltip: { callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { label += '$' + context.parsed.y.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } return label; } } } } } });
-    } else { console.error("Canvas 'miGrafico' no encontrado."); }
+        const miGrafico = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Ventas Últimos ' + dias + ' Días ($)',
+                    data: data,
+                    borderColor: 'rgba(79, 198, 198, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    x: { // Configuraciones para el eje X
+                        ticks: {
+                            color: '#000', // Cambia el color del texto del eje X a negro
+                            font: {
+                                size: 12,        // Cambia el tamaño de la fuente del eje X
+                                weight: 'bold'  // Cambia el peso de la fuente del eje X
+                            }
+                        }
+                    },
+                    y: { // Configuraciones para el eje Y
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#000', // Cambia el color del texto del eje Y a negro
+                            font: {
+                                size: 12,        // Cambia el tamaño de la fuente del eje Y
+                                weight: 'bold'  // Cambia el peso de la fuente del eje Y
+                            },
+                            callback: function(value) {
+                                return '$' + value.toLocaleString('es-CO');
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += '$' + context.parsed.y.toLocaleString('es-CO', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    });
+                                }
+                                return label;
+                            }
+                        }
+                    },
+                    title: {  // Configuración del título del gráfico
+                        display: true,
+                        text: 'Ventas de los Últimos ' + dias + ' Días',  // Puedes hacer esto dinámico si `dias` es una variable de PHP
+                        color: '#000',  // Color del título
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        }
+                    },
+                    legend: { //Configuración de la leyenda
+                       labels: {
+                           color: '#000',  // Color de la leyenda
+                           font: {
+                                size: 12,
+                                weight: 'normal'
+                            }
+                       }
+                    }
+                }
+            }
+        });
+    } else {
+        console.error("Canvas 'miGrafico' no encontrado.");
+    }
 </script>
 
 <?php include("includes/footer.php"); ?>

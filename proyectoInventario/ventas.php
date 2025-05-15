@@ -113,7 +113,7 @@ include("includes/header.php");
         
         <hr>
         <div class="row justify-content-end">
-            <div class="col-md-4 text-end"> {/* Alineado a la derecha */}
+            <div class="col-md-4 text-end">
                 <h4>Total Venta: <span id="total-venta-display" class="fw-bold">$0.00</span></h4>
                 <input type="hidden" name="precioVentaTotal" id="precioVentaTotalInput" value="0">
             </div>
