@@ -1,30 +1,38 @@
 <?php
-function getSalesReportByDateRange(mysqli $conn, string $startDate, string $endDate): array|false {
-    $sql = "SELECT DATE(fechaVenta) AS fecha, SUM(precioVentaTotal) AS total
-            FROM ventas
-            WHERE DATE(fechaVenta) BETWEEN ? AND ?
-            GROUP BY DATE(fechaVenta)
-            ORDER BY fecha ASC";
-
-    $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        error_log("Error preparando informe: " . $conn->error);
-        return false;
+function getSalesReportByDateRange($conn, $startDate, $endDate, $vendedorId = null) {
+    if ($vendedorId) {
+        $query = "SELECT v.fechaVenta, u.nombrecompleto, SUM(v.precioVentaTotal) as total 
+                  FROM ventas v
+                  INNER JOIN Usuario u ON v.vendedorId = u.IdUsuario
+                  WHERE v.fechaVenta BETWEEN ? AND ? AND v.vendedorId = ?
+                  GROUP BY v.fechaVenta, u.nombrecompleto
+                  ORDER BY v.fechaVenta ASC";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("ssi", $startDate, $endDate, $vendedorId);
+    } else {
+        $query = "SELECT v.fechaVenta, u.nombrecompleto, SUM(v.precioVentaTotal) as total 
+                  FROM ventas v
+                  INNER JOIN Usuario u ON v.vendedorId = u.IdUsuario
+                  WHERE v.fechaVenta BETWEEN ? AND ?
+                  GROUP BY v.fechaVenta, u.nombrecompleto
+                  ORDER BY v.fechaVenta ASC";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("ss", $startDate, $endDate);
     }
 
-    $stmt->bind_param('ss', $startDate, $endDate);
-    if (!$stmt->execute()) {
-        error_log("Error ejecutando informe: " . $stmt->error);
-        $stmt->close();
-        return false;
-    }
-
+    $stmt->execute();
     $result = $stmt->get_result();
-    $report = [];
+
+    $data = [];
     while ($row = $result->fetch_assoc()) {
-        $report[] = $row;
+        $data[] = $row;
     }
 
-    $stmt->close();
-    return $report;
+    return $data;
 }
+
+function getAllUsuarios($conn) {
+    $result = $conn->query("SELECT IdUsuario, nombrecompleto FROM Usuario");
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+?>
