@@ -42,7 +42,7 @@ if (isset($_POST["login"])) {
         }
     } else {
         // Usuario no encontrado: error
-        $_SESSION['message'] = 'Usuario no encontrado';
+        $_SESSION['message'] = 'Credenciales IncorrectasU';
         $_SESSION['message_type'] = 'danger';
         header("Location: index.php");
         exit();

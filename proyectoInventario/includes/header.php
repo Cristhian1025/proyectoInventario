@@ -1,5 +1,21 @@
 <?php
 
+$inactivity_timeout = 1800; //Segundos permitidos de inactividad - 30 minutos = 1800
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > $inactivity_timeout)) {
+
+    session_unset();     
+    //session_destroy();   // Destruir sesión -> pero no imprime mensaje
+    // Mensaje a imprimir
+    $_SESSION['message'] = 'Tu sesión ha expirado por inactividad. Por favor, inicia sesión de nuevo.';
+    $_SESSION['message_type'] = 'Warning';
+    session_write_close();
+    header("Location: index.php"); // Redirigir a la página de inicio de sesión
+    exit();
+}
+
+// Actualizar el timestamp de la última actividad a la hora actual
+$_SESSION['LAST_ACTIVITY'] = time();
+
 
 if (!isset($_SESSION['nombreUsuario'])) {  // Asegúrate de usar el mismo nombre de sesión
     header("Location: index.php"); // Redirige al inicio de sesión si no está autenticado
