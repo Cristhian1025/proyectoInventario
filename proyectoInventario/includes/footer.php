@@ -1,6 +1,6 @@
     
     <footer>
-        <p>&copy; 2024 "InventarioInc". Todos los derechos reservados.
+        <p>&copy; 2025 "InventarioInc". Todos los derechos reservados.
 
         <a target="_blank" href="https://github.com/Cristhian1025"><i class="fa-brands fa-github"></i></a>
         <a target="_blank" href="https://www.linkedin.com/in/cristhian-andrey-poveda-gaviria-21075a1b0/"><i class="fa-brands fa-linkedin"></i></a>
