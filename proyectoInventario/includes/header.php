@@ -60,6 +60,7 @@ if (!isset($_SESSION['nombreUsuario'])) {  // Asegúrate de usar el mismo nombre
         <a href="proveedores.php" class="caja_nav">proveedores</a>
         <a href="entradaproductos.php" class="caja_nav">Entrada de Productos</a>
         <a href="ventas.php" class="caja_nav">Registrar Venta</a>
+        <a href="listado_ventas.php" class="caja_nav">Listado de Ventas</a>
         <a href="informes.php" class="caja_nav">Informes</a>
     </ul>
 </nav>

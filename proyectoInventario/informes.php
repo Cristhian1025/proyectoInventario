@@ -34,8 +34,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['start']) && isset($_GET
                 <?php endforeach; ?>
             </select>
         </div>
-        <div class="col-md-3 d-flex align-items-end">
+        <div class="col-md-2 d-flex align-items-end">
             <button type="submit" class="btn btn-primary w-100">Generar</button>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" formtarget="_blank" formaction="exportar_informe.php" class="btn btn-success w-100">Exportar PDF</button>
         </div>
     </form>
 
