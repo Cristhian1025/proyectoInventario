@@ -63,7 +63,7 @@ if (!empty($selectedOption)) {
             break;
         case 'ventas':
             $queryResult = getRecentSales($conn, $currentPage, $recordsPerPage);
-            $tableHeaders = ['ID', 'Fecha', 'Producto', 'Cant. Vendida', 'Precio Venta T.', 'Vendedor', 'Acciones'];
+            $tableHeaders = ['ID Venta', 'Fecha', 'Vendedor', 'Total Venta', 'Acciones'];
             $actionLinks = ['edit_url' => 'edit_venta.php?id=', 'delete_url' => 'delete_Venta.php?id=', 'id_column' => 'idVenta'];
             break;
     }
@@ -131,31 +131,54 @@ function generateHtmlTable(array $data, array $headers, array $actions = []): st
         $html .= "<th>" . htmlspecialchars($header) . "</th>";
     }
     $html .= "</tr></thead><tbody>";
-    $dataKeys = array_keys($data[0]);
-    foreach ($data as $row) {
-        $html .= "<tr>";
-        foreach ($dataKeys as $key) {
-            if (str_contains(strtolower($key), 'precio')) {
-                 $precio = is_numeric($row[$key] ?? null) ? $row[$key] : 0;
-                 $html .= "<td>$" . number_format($precio, 2, ',', '.') . "</td>";
+    if (isset($_REQUEST['opcion']) && $_REQUEST['opcion'] == 'ventas') {
+        foreach ($data as $row) {
+            $html .= "<tr>";
+            $html .= "<td>" . htmlspecialchars($row['idVenta'] ?? '') . "</td>";
+            $html .= "<td>" . htmlspecialchars(date("d/m/Y", strtotime($row['fechaVenta']))) . "</td>";
+            $html .= "<td>" . htmlspecialchars($row['nombreCompleto'] ?? '') . "</td>";
+            $precio = is_numeric($row['totalVenta'] ?? null) ? $row['totalVenta'] : 0;
+            $html .= "<td>$" . number_format($precio, 2, ',', '.') . "</td>";
+            // Celda de acciones para ventas
+            if (!empty($actions) && isset($row[$actions['id_column']])) {
+                $id = $row[$actions['id_column']];
+                $html .= "<td class='text-nowrap'>";
+                // Para ventas, podríamos querer un enlace a la factura, no a editar/eliminar
+                $html .= "<a href='generar_factura.php?id_venta=" . htmlspecialchars($id) . "' class='btn btn-sm btn-info' target='_blank' title='Ver Factura'><i class='fas fa-file-pdf'></i> Ver Factura</a>";
+                $html .= "</td>";
             } else {
-                $html .= "<td>" . htmlspecialchars($row[$key] ?? '') . "</td>";
+                $html .= "<td></td>";
             }
+            $html .= "</tr>";
         }
-        if (!empty($actions) && isset($row[$actions['id_column']])) {
-            $id = $row[$actions['id_column']];
-            $html .= "<td class='text-nowrap'>";
-            if (isset($actions['edit_url'])) {
-                $html .= "<a href='" . htmlspecialchars($actions['edit_url'] . $id) . "' class='btn btn-sm btn-warning me-1' title='Editar'><i class='fas fa-edit'></i></a>";
+    } else {
+        // Comportamiento original para todas las demás tablas
+        $dataKeys = array_keys($data[0]);
+        foreach ($data as $row) {
+            $html .= "<tr>";
+            foreach ($dataKeys as $key) {
+                if (str_contains(strtolower($key), 'precio')) {
+                     $precio = is_numeric($row[$key] ?? null) ? $row[$key] : 0;
+                     $html .= "<td>$" . number_format($precio, 2, ',', '.') . "</td>";
+                } else {
+                    $html .= "<td>" . htmlspecialchars($row[$key] ?? '') . "</td>";
+                }
             }
-            if (isset($actions['delete_url'])) {
-                $html .= "<a href='" . htmlspecialchars($actions['delete_url'] . $id) . "' class='btn btn-sm btn-danger' title='Eliminar' onclick='return confirm(\"¿Estás seguro?\");'><i class='fas fa-trash-alt'></i></a>";
+            if (!empty($actions) && isset($row[$actions['id_column']])) {
+                $id = $row[$actions['id_column']];
+                $html .= "<td class='text-nowrap'>";
+                if (isset($actions['edit_url'])) {
+                    $html .= "<a href='" . htmlspecialchars($actions['edit_url'] . $id) . "' class='btn btn-sm btn-warning me-1' title='Editar'><i class='fas fa-edit'></i></a>";
+                }
+                if (isset($actions['delete_url'])) {
+                    $html .= "<a href='" . htmlspecialchars($actions['delete_url'] . $id) . "' class='btn btn-sm btn-danger' title='Eliminar' onclick='return confirm(\"¿Estás seguro?\");'><i class='fas fa-trash-alt'></i></a>";
+                }
+                $html .= "</td>";
+            } elseif (!empty($actions)) {
+                 $html .= "<td></td>";
             }
-            $html .= "</td>";
-        } elseif (!empty($actions)) {
-             $html .= "<td></td>";
+            $html .= "</tr>";
         }
-        $html .= "</tr>";
     }
     $html .= "</tbody></table></div>";
     return $html;

@@ -1,7 +1,7 @@
 <?php
 function getSalesReportByDateRange($conn, $startDate, $endDate, $vendedorId = null) {
     if ($vendedorId) {
-        $query = "SELECT v.fechaVenta, u.nombrecompleto, SUM(v.precioVentaTotal) as total 
+        $query = "SELECT v.fechaVenta, u.nombrecompleto, COUNT(DISTINCT v.idVenta) as numero_ventas, SUM(v.totalVenta) as total 
                   FROM ventas v
                   INNER JOIN Usuario u ON v.vendedorId = u.IdUsuario
                   WHERE v.fechaVenta BETWEEN ? AND ? AND v.vendedorId = ?
@@ -10,7 +10,7 @@ function getSalesReportByDateRange($conn, $startDate, $endDate, $vendedorId = nu
         $stmt = $conn->prepare($query);
         $stmt->bind_param("ssi", $startDate, $endDate, $vendedorId);
     } else {
-        $query = "SELECT v.fechaVenta, u.nombrecompleto, SUM(v.precioVentaTotal) as total 
+        $query = "SELECT v.fechaVenta, u.nombrecompleto, COUNT(DISTINCT v.idVenta) as numero_ventas, SUM(v.totalVenta) as total 
                   FROM ventas v
                   INNER JOIN Usuario u ON v.vendedorId = u.IdUsuario
                   WHERE v.fechaVenta BETWEEN ? AND ?

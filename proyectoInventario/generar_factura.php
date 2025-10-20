@@ -96,7 +96,7 @@ class PDF_Invoice extends FPDF
         $this->Cell(120);
         $this->Cell(35, 7, 'TOTAL', 1, 0, 'C');
         $this->SetFont('','',11);
-        $this->Cell(35, 7, '$'.number_format($venta['precioVentaTotal'], 2), 1, 1, 'R');
+        $this->Cell(35, 7, '$'.number_format($venta['totalVenta'], 2), 1, 1, 'R');
     }
 }
 

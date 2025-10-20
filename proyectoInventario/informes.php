@@ -48,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['start']) && isset($_GET
                 <tr>
                     <th>Fecha</th>
                     <th>Vendedor</th>
+                    <th>Nro. Ventas</th>
                     <th>Total Vendido</th>
                 </tr>
             </thead>
@@ -60,11 +61,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['start']) && isset($_GET
                     <tr>
                         <td><?= $row['fechaVenta'] ?></td>
                         <td><?= htmlspecialchars($row['nombrecompleto']) ?></td>
+                        <td><?= htmlspecialchars($row['numero_ventas']) ?></td>
                         <td>$<?= number_format($row['total'], 2) ?></td>
                     </tr>
                 <?php endforeach; ?>
                 <tr class="table-secondary fw-bold">
-                    <td colspan="2" class="text-end">Total General:</td>
+                    <td colspan="3" class="text-end">Total General:</td>
                     <td>$<?= number_format($totalGeneral, 2) ?></td>
                 </tr>
             </tbody>

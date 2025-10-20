@@ -9,12 +9,13 @@ if (isset($_SESSION['nombreUsuario'])) {
 
 // Preparar variables para el mensaje (si existe)
 $message = null;
-$message_type = 'danger'; // Tipo por defecto si no se especifica
+$message_type = 'danger'; //Por defecto si no se especifica
 if (isset($_SESSION['message'])) {
     $message = $_SESSION['message'];
     if (isset($_SESSION['message_type'])) {
         $message_type = $_SESSION['message_type']; // Obtener el tipo real
     }
+
     unset($_SESSION['message']);
     unset($_SESSION['message_type']); // Limpiar ambos
 }

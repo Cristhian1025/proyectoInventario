@@ -2,7 +2,6 @@
 require('fpdf/fpdf.php');
 require('db.php');
 require('queries/informe_queries.php');
-
 class PDF extends FPDF
 {
     // Cabecera de página
@@ -80,7 +79,6 @@ if (isset($_GET['start']) && isset($_GET['end'])) {
     } else {
         $pdf->Cell(0,10,'No se encontraron resultados para el rango de fechas seleccionado.',0,1);
     }
-    
     $pdf->Output('D', 'Informe_Ventas.pdf');
 } else {
     echo "Por favor, especifique un rango de fechas.";
