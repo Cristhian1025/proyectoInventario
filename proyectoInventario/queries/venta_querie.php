@@ -1,22 +1,50 @@
 <?php
 
-function getAllVentas($conn, int $page = 1, int $recordsPerPage = 10): array|false
+function getAllVentas($conn, int $page = 1, int $recordsPerPage = 10, ?string $searchCedulaNit = null, ?string $searchNombreCliente = null): array|false
 {
     $offset = ($page - 1) * $recordsPerPage;
+    $whereClauses = [];
+    $params = [];
+    $types = '';
+
+    if ($searchCedulaNit !== null && $searchCedulaNit !== '') {
+        $whereClauses[] = 'v.cedulaNit LIKE ?';
+        $params[] = '%' . $searchCedulaNit . '%';
+        $types .= 's';
+    }
+
+    if ($searchNombreCliente !== null && $searchNombreCliente !== '') {
+        $whereClauses[] = 'v.nombreCliente LIKE ?';
+        $params[] = '%' . $searchNombreCliente . '%';
+        $types .= 's';
+    }
+
+    $whereSql = '';
+    if (!empty($whereClauses)) {
+        $whereSql = ' WHERE ' . implode(' AND ', $whereClauses);
+    }
 
     // Contar el total de registros
-    $sqlCount = "SELECT COUNT(*) as total FROM ventas";
-    $resCount = $conn->query($sqlCount);
-    if (!$resCount) {
+    $sqlCount = "SELECT COUNT(*) as total FROM ventas v" . $whereSql;
+    $stmtCount = $conn->prepare($sqlCount);
+    if ($stmtCount) {
+        if (!empty($params)) {
+            $stmtCount->bind_param($types, ...$params);
+        }
+        $stmtCount->execute();
+        $resCount = $stmtCount->get_result();
+        $totalRecords = $resCount->fetch_assoc()['total'] ?? 0;
+        $stmtCount->close();
+    } else {
         error_log("Error en getAllVentas (count): " . $conn->error);
         return false;
     }
-    $totalRecords = $resCount->fetch_assoc()['total'] ?? 0;
+    
 
     // Obtener los datos de la página actual
-    $sql = "SELECT v.idVenta, v.fechaVenta, u.nombreCompleto as vendedor, v.totalVenta
+    $sql = "SELECT v.idVenta, v.fechaVenta, u.nombreCompleto as vendedor, v.totalVenta, v.cedulaNit, v.nombreCliente
               FROM ventas v
-              INNER JOIN usuario u ON v.vendedorId = u.idUsuario
+              INNER JOIN usuario u ON v.vendedorId = u.idUsuario" . $whereSql . "
               ORDER BY v.fechaVenta DESC, v.idVenta DESC
               LIMIT ? OFFSET ?";
     
@@ -25,7 +53,13 @@ function getAllVentas($conn, int $page = 1, int $recordsPerPage = 10): array|fal
         error_log("Error en getAllVentas (prepare): " . $conn->error);
         return false;
     }
-    $stmt->bind_param('ii', $recordsPerPage, $offset);
+
+    $allParams = $params;
+    $allParams[] = $recordsPerPage;
+    $allParams[] = $offset;
+    $types .= 'ii';
+
+    $stmt->bind_param($types, ...$allParams);
     if (!$stmt->execute()) {
         error_log("Error en getAllVentas (execute): " . $stmt->error);
         $stmt->close();

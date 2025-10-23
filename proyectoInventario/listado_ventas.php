@@ -3,12 +3,15 @@ include("db.php");
 require_once 'queries/venta_querie.php';
 include("includes/header.php");
 
-// Lógica de paginación
+// Lógica de paginación y búsqueda
 $recordsPerPage = 10;
 $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if ($currentPage < 1) $currentPage = 1;
 
-$queryResult = getAllVentas($conn, $currentPage, $recordsPerPage);
+$searchCedulaNit = $_GET['search_cedula'] ?? null;
+$searchNombreCliente = $_GET['search_nombre'] ?? null;
+
+$queryResult = getAllVentas($conn, $currentPage, $recordsPerPage, $searchCedulaNit, $searchNombreCliente);
 
 $ventas = [];
 $paginationHtml = '';
@@ -18,7 +21,7 @@ if ($queryResult !== false) {
     $totalRecords = $queryResult['totalRecords'];
     $totalPages = ceil($totalRecords / $recordsPerPage);
     if ($totalPages > 1) {
-        $paginationHtml = generatePaginationLinks($currentPage, $totalPages);
+        $paginationHtml = generatePaginationLinks($currentPage, $totalPages, ['search_cedula' => $searchCedulaNit, 'search_nombre' => $searchNombreCliente]);
     }
 }
 
@@ -67,6 +70,21 @@ function generatePaginationLinks(int $currentPage, int $totalPages, array $baseP
 <div class="container mt-5 mb-5">
     <h2 class="text-center mb-4">Listado de Ventas</h2>
 
+    <!-- Formulario de Búsqueda -->
+    <form action="listado_ventas.php" method="GET" class="mb-4">
+        <div class="row">
+            <div class="col-md-5">
+                <input type="text" name="search_cedula" class="form-control" placeholder="Buscar por Cédula/NIT" value="<?= htmlspecialchars($searchCedulaNit ?? '') ?>">
+            </div>
+            <div class="col-md-5">
+                <input type="text" name="search_nombre" class="form-control" placeholder="Buscar por Nombre Cliente" value="<?= htmlspecialchars($searchNombreCliente ?? '') ?>">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Buscar</button>
+            </div>
+        </div>
+    </form>
+
     <?php if (isset($_SESSION['message'])) : ?>
     <div class="alert alert-<?= htmlspecialchars($_SESSION['message_type']); ?> alert-dismissible fade show" role="alert">
         <?= htmlspecialchars($_SESSION['message']); ?>
@@ -85,6 +103,8 @@ function generatePaginationLinks(int $currentPage, int $totalPages, array $baseP
                     <th>ID Venta</th>
                     <th>Fecha</th>
                     <th>Vendedor</th>
+                    <th>Cliente</th>
+                    <th>Cédula/NIT</th>
                     <th>Total</th>
                     <th>Acciones</th>
                 </tr>
@@ -96,6 +116,8 @@ function generatePaginationLinks(int $currentPage, int $totalPages, array $baseP
                             <td><?= htmlspecialchars($venta['idVenta']); ?></td>
                             <td><?= htmlspecialchars(date("d/m/Y", strtotime($venta['fechaVenta']))); ?></td>
                             <td><?= htmlspecialchars($venta['vendedor']); ?></td>
+                            <td><?= htmlspecialchars($venta['nombreCliente']); ?></td>
+                            <td><?= htmlspecialchars($venta['cedulaNit']); ?></td>
                             <td>$<?= htmlspecialchars(number_format($venta['totalVenta'], 2)); ?></td>
                             <td>
                                 <a href="generar_factura.php?id_venta=<?= htmlspecialchars($venta['idVenta']); ?>" class="btn btn-info btn-sm" target="_blank" title="Ver Factura">
@@ -109,7 +131,7 @@ function generatePaginationLinks(int $currentPage, int $totalPages, array $baseP
                     <?php endforeach; ?>
                 <?php else : ?>
                     <tr>
-                        <td colspan="5" class="text-center">No hay ventas registradas.</td>
+                        <td colspan="7" class="text-center">No hay ventas registradas que coincidan con la búsqueda.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
