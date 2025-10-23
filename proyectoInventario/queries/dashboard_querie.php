@@ -12,7 +12,6 @@ function getFilteredProducts(mysqli $conn, string $filter = '', int $page = 1, i
     if (!$stmtCount->execute()) { $stmtCount->close(); return false; }
     $totalRecords = $stmtCount->get_result()->fetch_assoc()['total'] ?? 0;
     $stmtCount->close();
-
     $sqlData = "SELECT P.idProducto, P.nombreProducto, P.descripcionProducto, P.cantidad, P.precioVenta, P.precioCompra, Pr.nombreProveedor, C.nombreCategoria FROM Productos P LEFT JOIN Proveedores Pr ON P.proveedorId = Pr.idProveedor LEFT JOIN Categorias C ON P.CategoriaId = C.idCategoria WHERE P.nombreProducto LIKE ? OR Pr.nombreProveedor LIKE ? OR C.nombreCategoria LIKE ? ORDER BY P.idProducto DESC LIMIT ? OFFSET ?";
     $stmtData = $conn->prepare($sqlData);
     if (!$stmtData) { error_log("Error prepare data: " . $conn->error); return false; }
