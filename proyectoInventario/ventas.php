@@ -73,6 +73,17 @@ include("includes/header.php");
             </div>
         </div>
 
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="cedulaNit" class="form-label">Cédula o Nit</label>
+                <input type="text" class="form-control" id="cedulaNit" name="cedulaNit" placeholder="Cédula o Nit del cliente">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="nombreCliente" class="form-label">Nombre del Cliente</label>
+                <input type="text" class="form-control" id="nombreCliente" name="nombreCliente" placeholder="Nombre del cliente">
+            </div>
+        </div>
+
         <hr>
         <h4 class="mb-3">Productos</h4>
         <div id="productos-container">

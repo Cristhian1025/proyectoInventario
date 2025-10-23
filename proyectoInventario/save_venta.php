@@ -15,15 +15,17 @@ if (isset($_POST['save_venta'])) {
     $totalVenta = $_POST['precioVentaTotal'];
     $productosIds = $_POST['productoId'];
     $cantidades = $_POST['cantidadVenta'];
+    $cedulaNit = !empty($_POST['cedulaNit']) ? $_POST['cedulaNit'] : NULL;
+    $nombreCliente = !empty($_POST['nombreCliente']) ? $_POST['nombreCliente'] : NULL;
 
     // Iniciar transacción
     mysqli_begin_transaction($conn);
 
     try {
         // 1. Insertar la venta principal
-        $query_venta = "INSERT INTO ventas (fechaVenta, vendedorId, totalVenta) VALUES (?, ?, ?)";
+        $query_venta = "INSERT INTO ventas (fechaVenta, vendedorId, totalVenta, cedulaNit, nombreCliente) VALUES (?, ?, ?, ?, ?)";
         $stmt_venta = mysqli_prepare($conn, $query_venta);
-        mysqli_stmt_bind_param($stmt_venta, "sid", $fechaVenta, $vendedorId, $totalVenta);
+        mysqli_stmt_bind_param($stmt_venta, "sidss", $fechaVenta, $vendedorId, $totalVenta, $cedulaNit, $nombreCliente);
         if (!mysqli_stmt_execute($stmt_venta)) {
             throw new Exception("Error al guardar la venta principal: " . mysqli_stmt_error($stmt_venta));
         }
