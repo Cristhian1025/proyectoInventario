@@ -43,7 +43,7 @@ function getVentaDetailsById($conn, $idVenta) {
     $details = [];
 
     // Obtener información principal de la venta
-    $query_main = "SELECT v.idVenta, v.fechaVenta, u.nombreCompleto as vendedor, v.totalVenta
+    $query_main = "SELECT v.idVenta, v.fechaVenta, u.nombreCompleto as vendedor, v.totalVenta, v.cedulaNit, v.nombreCliente
                    FROM ventas v
                    INNER JOIN usuario u ON v.vendedorId = u.idUsuario
                    WHERE v.idVenta = ?";

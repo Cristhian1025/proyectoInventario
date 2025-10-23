@@ -61,6 +61,20 @@ class PDF_Invoice extends FPDF
         $this->Cell(40, 7, 'Vendedor:', 0, 0);
         $this->SetFont('','',11);
         $this->Cell(100, 7, utf8_decode($venta['vendedor']), 0, 1);
+
+        if (!empty($venta['nombreCliente'])) {
+            $this->SetFont('Arial','B',11);
+            $this->Cell(40, 7, 'Cliente:', 0, 0);
+            $this->SetFont('','',11);
+            $this->Cell(100, 7, utf8_decode($venta['nombreCliente']), 0, 1);
+        }
+
+        if (!empty($venta['cedulaNit'])) {
+            $this->SetFont('Arial','B',11);
+            $this->Cell(40, 7, 'Cedula/NIT:', 0, 0);
+            $this->SetFont('','',11);
+            $this->Cell(100, 7, utf8_decode($venta['cedulaNit']), 0, 1);
+        }
         $this->Ln(10);
     }
 
