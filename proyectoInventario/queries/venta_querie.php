@@ -1,10 +1,8 @@
 <?php
-
-function getAllVentas($conn, int $page = 1, int $recordsPerPage = 10): array|false
-{
+function getAllVentas($conn, int $page = 1, int $recordsPerPage = 10): array|false {
     $offset = ($page - 1) * $recordsPerPage;
 
-    // Contar el total de registros
+    // Contar total de registros
     $sqlCount = "SELECT COUNT(*) as total FROM ventas";
     $resCount = $conn->query($sqlCount);
     if (!$resCount) {
@@ -13,25 +11,26 @@ function getAllVentas($conn, int $page = 1, int $recordsPerPage = 10): array|fal
     }
     $totalRecords = $resCount->fetch_assoc()['total'] ?? 0;
 
-    // Obtener los datos de la página actual
-    $sql = "SELECT v.idVenta, v.fechaVenta, u.nombreCompleto as vendedor, v.totalVenta
-              FROM ventas v
-              INNER JOIN usuario u ON v.vendedorId = u.idUsuario
-              ORDER BY v.fechaVenta DESC, v.idVenta DESC
-              LIMIT ? OFFSET ?";
-    
+    // Obtener las ventas de la página actual
+    $sql = "SELECT v.idVenta, v.fechaVenta, u.nombrecompleto AS vendedor, v.totalVenta
+            FROM ventas v
+            INNER JOIN usuario u ON v.vendedorId = u.idUsuario
+            ORDER BY v.fechaVenta DESC, v.idVenta DESC
+            LIMIT ? OFFSET ?";
+
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         error_log("Error en getAllVentas (prepare): " . $conn->error);
         return false;
     }
+
     $stmt->bind_param('ii', $recordsPerPage, $offset);
     if (!$stmt->execute()) {
         error_log("Error en getAllVentas (execute): " . $stmt->error);
         $stmt->close();
         return false;
     }
-    
+
     $result = $stmt->get_result();
     $data = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
     $stmt->close();
@@ -42,35 +41,43 @@ function getAllVentas($conn, int $page = 1, int $recordsPerPage = 10): array|fal
 function getVentaDetailsById($conn, $idVenta) {
     $details = [];
 
-    // Obtener información principal de la venta
-    $query_main = "SELECT v.idVenta, v.fechaVenta, u.nombreCompleto as vendedor, v.totalVenta
+    // Información principal
+    $query_main = "SELECT v.idVenta, v.fechaVenta, u.nombrecompleto AS vendedor, v.totalVenta
                    FROM ventas v
                    INNER JOIN usuario u ON v.vendedorId = u.idUsuario
                    WHERE v.idVenta = ?";
-    
-    $stmt_main = mysqli_prepare($conn, $query_main);
-    mysqli_stmt_bind_param($stmt_main, "i", $idVenta);
-    mysqli_stmt_execute($stmt_main);
-    $result_main = mysqli_stmt_get_result($stmt_main);
-    $details['venta'] = mysqli_fetch_assoc($result_main);
 
-    if (!$details['venta']) {
-        return null; // La venta no existe
+    $stmt_main = $conn->prepare($query_main);
+    if (!$stmt_main) {
+        error_log("Error preparando getVentaDetailsById: " . $conn->error);
+        return null;
     }
 
-    // Obtener los productos de la venta (detalle)
-    $query_items = "SELECT p.nombreProducto, dv.cantidad, dv.precioUnitario, (dv.cantidad * dv.precioUnitario) as importe
+    $stmt_main->bind_param("i", $idVenta);
+    $stmt_main->execute();
+    $result_main = $stmt_main->get_result();
+    $details['venta'] = $result_main->fetch_assoc();
+
+    if (!$details['venta']) return null; // No existe la venta
+
+    // Detalle de productos
+    $query_items = "SELECT p.nombreProducto, dv.cantidad, dv.precioUnitario,
+                           (dv.cantidad * dv.precioUnitario) AS importe
                     FROM detalle_venta dv
                     INNER JOIN productos p ON dv.productoId = p.idProducto
                     WHERE dv.ventaId = ?";
 
-    $stmt_items = mysqli_prepare($conn, $query_items);
-    mysqli_stmt_bind_param($stmt_items, "i", $idVenta);
-    mysqli_stmt_execute($stmt_items);
-    $result_items = mysqli_stmt_get_result($stmt_items);
-    $details['items'] = mysqli_fetch_all($result_items, MYSQLI_ASSOC);
-    
-    // Renombrar 'cantidad' a 'cantidadVendida' para compatibilidad con la factura
+    $stmt_items = $conn->prepare($query_items);
+    if (!$stmt_items) {
+        error_log("Error preparando detalle de venta: " . $conn->error);
+        return null;
+    }
+
+    $stmt_items->bind_param("i", $idVenta);
+    $stmt_items->execute();
+    $result_items = $stmt_items->get_result();
+    $details['items'] = $result_items ? $result_items->fetch_all(MYSQLI_ASSOC) : [];
+
     foreach ($details['items'] as &$item) {
         $item['cantidadVendida'] = $item['cantidad'];
         unset($item['cantidad']);
@@ -78,5 +85,4 @@ function getVentaDetailsById($conn, $idVenta) {
 
     return $details;
 }
-
 ?>

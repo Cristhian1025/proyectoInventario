@@ -1,4 +1,11 @@
-    
+<?php
+/**
+ * includes/footer.php
+ *
+ * Pie de página común para las vistas. Encabezado en español añadido.
+ */
+?>
+
     <footer>
         <p>&copy; 2025 "InventarioInc". Todos los derechos reservados.
 

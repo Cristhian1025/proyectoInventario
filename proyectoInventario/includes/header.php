@@ -22,6 +22,14 @@ if (!isset($_SESSION['nombreUsuario'])) {  // Asegúrate de usar el mismo nombre
     exit();
 }
 ?>
+<?php
+/**
+ * includes/header.php
+ *
+ * Cabecera común para las páginas (barra de navegación, estilos, scripts).
+ * Encabezado en español añadido.
+ */
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>

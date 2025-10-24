@@ -1,4 +1,27 @@
 <?php
+/**
+ * dashboard.php
+ *
+ * Panel de control principal del sistema de inventario.
+ * Encabezado agregado en español. No se modifica la lógica existente.
+ */
+/**
+ * dashboard.php
+ *
+ * Panel de control principal del sistema de inventario.
+ *
+ * Este archivo muestra widgets (productos más vendidos, productos con bajo stock),
+ * un gráfico de ventas en los últimos N días y permite consultar tablas (productos,
+ * proveedores, entradas y ventas) con paginación y filtrado básico.
+ *
+ * Documentación en español añadida: comentarios explicativos y PHPDoc en las
+ * funciones definidas en este archivo.
+ *
+ * Notas de seguridad y buenas prácticas:
+ * - Validar y sanitizar todas las entradas (se usan htmlspecialchars en las salidas).
+ * - Evitar lógica de negocio compleja en las vistas; separar en capas.
+ */
+
 require_once("db.php");
 require_once("queries/dashboard_querie.php");
 
@@ -115,35 +138,51 @@ $chartData = getSalesDataForChart($conn, $days);
 
 
 // --- Función para generar Tabla HTML (sin cambios) ---
+/**
+ * Genera una tabla HTML a partir de un array de datos.
+ *
+ * Este helper construye la estructura HTML de la tabla, formatea campos que contienen
+ * la palabra 'precio' como valores monetarios y añade botones de acción cuando se
+ * proporcionan URLs de edición/ eliminación en $actions.
+ *
+ * @param array $data Matriz de filas (cada fila es un array asociativo con claves -> columnas).
+ * @param array $headers Lista de cabeceras a mostrar en la tabla (orden de columnas deseado).
+ * @param array $actions Opcional. Array con claves 'edit_url', 'delete_url' y 'id_column' para crear botones de acción.
+ * @return string HTML seguro y listo para imprimir (usar echo) con la tabla generada.
+ */
 function generateHtmlTable(array $data, array $headers, array $actions = []): string
 {
+    // Si no hay datos, devolvemos un mensaje estándar
     if (empty($data)) return "<p class='text-center my-4'>No hay datos para mostrar.</p>";
 
+    // Título principal basado en la opción solicitada (productos, proveedores, etc.)
     $html = "<h2 class='text-center p-4'>" . htmlspecialchars(ucfirst($_REQUEST['opcion'] ?? 'Datos')) . "</h2>";
     if (isset($_REQUEST['opcion']) && $_REQUEST['opcion'] == 'ambos') $html = "<h2 class='text-center p-4'>Productos y Proveedores</h2>";
-    // Para ventas, el título de "últimas 10" se elimina si se pagina sobre todas
-    // if (isset($_REQUEST['opcion']) && $_REQUEST['opcion'] == 'ventas') $html .= "<h5 class='text-center p-1'>Últimas 10 ventas</h5>";
 
-
+    // Inicio de la tabla
     $html .= "<div class='table-responsive'><table class='table table-striped table-hover'>";
     $html .= "<thead class='table-dark'><tr>";
     foreach ($headers as $header) {
+        // Escapamos las cabeceras para evitar inyección de HTML
         $html .= "<th>" . htmlspecialchars($header) . "</th>";
     }
     $html .= "</tr></thead><tbody>";
+
+    // Caso especial para la tabla de ventas (formato de fecha y monto)
     if (isset($_REQUEST['opcion']) && $_REQUEST['opcion'] == 'ventas') {
         foreach ($data as $row) {
             $html .= "<tr>";
             $html .= "<td>" . htmlspecialchars($row['idVenta'] ?? '') . "</td>";
+            // Formateamos la fecha al formato DD/MM/YYYY
             $html .= "<td>" . htmlspecialchars(date("d/m/Y", strtotime($row['fechaVenta']))) . "</td>";
             $html .= "<td>" . htmlspecialchars($row['nombreCompleto'] ?? '') . "</td>";
             $precio = is_numeric($row['totalVenta'] ?? null) ? $row['totalVenta'] : 0;
             $html .= "<td>$" . number_format($precio, 2, ',', '.') . "</td>";
-            // Celda de acciones para ventas
+
+            // Celda de acciones para ventas: muestra un enlace a la factura en lugar de editar/eliminar
             if (!empty($actions) && isset($row[$actions['id_column']])) {
                 $id = $row[$actions['id_column']];
                 $html .= "<td class='text-nowrap'>";
-                // Para ventas, podríamos querer un enlace a la factura, no a editar/eliminar
                 $html .= "<a href='generar_factura.php?id_venta=" . htmlspecialchars($id) . "' class='btn btn-sm btn-info' target='_blank' title='Ver Factura'><i class='fas fa-file-pdf'></i> Ver Factura</a>";
                 $html .= "</td>";
             } else {
@@ -152,18 +191,22 @@ function generateHtmlTable(array $data, array $headers, array $actions = []): st
             $html .= "</tr>";
         }
     } else {
-        // Comportamiento original para todas las demás tablas
+        // Comportamiento general para otras tablas: generamos filas basadas en las claves del primer registro
         $dataKeys = array_keys($data[0]);
         foreach ($data as $row) {
             $html .= "<tr>";
             foreach ($dataKeys as $key) {
+                // Si la clave suena a precio, aplicamos formato monetario
                 if (str_contains(strtolower($key), 'precio')) {
                      $precio = is_numeric($row[$key] ?? null) ? $row[$key] : 0;
                      $html .= "<td>$" . number_format($precio, 2, ',', '.') . "</td>";
                 } else {
+                    // Escapamos cualquier valor mostrado
                     $html .= "<td>" . htmlspecialchars($row[$key] ?? '') . "</td>";
                 }
             }
+
+            // Si se proporcionaron URLs de acción, añadimos los botones de editar/eliminar
             if (!empty($actions) && isset($row[$actions['id_column']])) {
                 $id = $row[$actions['id_column']];
                 $html .= "<td class='text-nowrap'>";
@@ -171,6 +214,7 @@ function generateHtmlTable(array $data, array $headers, array $actions = []): st
                     $html .= "<a href='" . htmlspecialchars($actions['edit_url'] . $id) . "' class='btn btn-sm btn-warning me-1' title='Editar'><i class='fas fa-edit'></i></a>";
                 }
                 if (isset($actions['delete_url'])) {
+                    // Escapamos las comillas internas para evitar romper la cadena PHP
                     $html .= "<a href='" . htmlspecialchars($actions['delete_url'] . $id) . "' class='btn btn-sm btn-danger' title='Eliminar' onclick='return confirm(\"¿Estás seguro?\");'><i class='fas fa-trash-alt'></i></a>";
                 }
                 $html .= "</td>";
@@ -185,24 +229,37 @@ function generateHtmlTable(array $data, array $headers, array $actions = []): st
 }
 
 // --- Función para generar Enlaces de Paginación ---
+/**
+ * Genera el HTML para los enlaces de paginación.
+ *
+ * Crea enlaces "Anterior", varios números de página (con puntos suspensivos cuando procede)
+ * y "Siguiente". Utiliza $baseParams para conservar parámetros GET (como 'opcion' y 'filtro').
+ *
+ * @param int $currentPage Página actual (1-based).
+ * @param int $totalPages Total de páginas calculadas.
+ * @param array $baseParams Parámetros base que se incluirán en cada enlace (se añade 'page').
+ * @param int $linksToShow Número aproximado de enlaces a mostrar alrededor de la página actual.
+ * @return string HTML con la barra de paginación o cadena vacía si no es necesario paginar.
+ */
 function generatePaginationLinks(int $currentPage, int $totalPages, array $baseParams = [], int $linksToShow = 5): string
 {
+    // No mostramos paginación si solo hay una página o menos
     if ($totalPages <= 1) return '';
 
     $paginationHtml = '<nav aria-label="Page navigation"><ul class="pagination justify-content-center mt-4">';
 
-    // Botón Anterior
+    // Botón Anterior (deshabilitado si estamos en la primera página)
     $prevPage = $currentPage - 1;
     $baseParams['page'] = $prevPage;
     $queryStringPrev = http_build_query($baseParams);
     $paginationHtml .= '<li class="page-item ' . ($currentPage <= 1 ? 'disabled' : '') . '">';
     $paginationHtml .= '<a class="page-link" href="?' . $queryStringPrev . '">Anterior</a></li>';
 
-    // Números de página
-    // Lógica para mostrar un rango de páginas si hay muchas
+    // Calculamos rango de páginas a mostrar alrededor de la página actual
     $startPage = max(1, $currentPage - floor($linksToShow / 2));
     $endPage = min($totalPages, $currentPage + floor($linksToShow / 2));
 
+    // Si el rango comienza después de 1, añadimos el enlace a la primera página y puntos suspensivos
     if ($startPage > 1) {
         $baseParams['page'] = 1;
         $paginationHtml .= '<li class="page-item"><a class="page-link" href="?' . http_build_query($baseParams) . '">1</a></li>';
@@ -211,6 +268,7 @@ function generatePaginationLinks(int $currentPage, int $totalPages, array $baseP
         }
     }
 
+    // Enlaces numerados dentro del rango calculado
     for ($i = $startPage; $i <= $endPage; $i++) {
         $baseParams['page'] = $i;
         $queryStringPage = http_build_query($baseParams);
@@ -218,6 +276,7 @@ function generatePaginationLinks(int $currentPage, int $totalPages, array $baseP
         $paginationHtml .= '<a class="page-link" href="?' . $queryStringPage . '">' . $i . '</a></li>';
     }
 
+    // Si el rango no llega hasta la última página, mostramos puntos y el enlace a la última
      if ($endPage < $totalPages) {
         if ($endPage < $totalPages - 1) {
             $paginationHtml .= '<li class="page-item disabled"><span class="page-link">...</span></li>';
@@ -227,7 +286,7 @@ function generatePaginationLinks(int $currentPage, int $totalPages, array $baseP
     }
 
 
-    // Botón Siguiente
+    // Botón Siguiente (deshabilitado si estamos en la última página)
     $nextPage = $currentPage + 1;
     $baseParams['page'] = $nextPage;
     $queryStringNext = http_build_query($baseParams);

@@ -1,44 +1,100 @@
 <?php
+/**
+ * edit_proveedor.php
+ *
+ * Página para editar la información de un proveedor.
+ *
+ * Cambios realizados:
+ * - Se añadieron comentarios y PHPDoc en español.
+ * - Se encapsularon operaciones de lectura/actualización en funciones usando
+ *   sentencias preparadas para mejorar la seguridad frente a inyección SQL.
+ *
+ * NOTA: Este archivo sigue en estilo procedural para mantener compatibilidad
+ * con el proyecto; las funciones añadidas son auxiliares y devuelven datos
+ * simples para la plantilla HTML al final del archivo.
+ */
+
 include("db.php");
+
+/**
+ * Obtiene un proveedor por su ID.
+ *
+ * @param mysqli $conn Conexión mysqli activa.
+ * @param int $id Identificador del proveedor.
+ * @return array|false Devuelve un array asociativo con los datos del proveedor o false si no existe o hay error.
+ */
+function obtenerProveedorPorId($conn, int $id)
+{
+    $stmt = $conn->prepare("SELECT * FROM Proveedores WHERE idProveedor = ?");
+    if (!$stmt) return false;
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result && $result->num_rows > 0) {
+        return $result->fetch_assoc();
+    }
+    return false;
+}
+
+/**
+ * Actualiza los datos de un proveedor.
+ *
+ * @param mysqli $conn Conexión mysqli activa.
+ * @param int $id Identificador del proveedor a actualizar.
+ * @param array $data Array asociativo con las claves: nombreProveedor, descripcionProveedor,
+ *                    direccionProveedor, telefono, Correo, infoAdicional.
+ * @return bool True si la actualización se realizó correctamente, false en caso contrario.
+ */
+function actualizarProveedor($conn, int $id, array $data): bool
+{
+    $stmt = $conn->prepare("UPDATE Proveedores SET nombreProveedor = ?, descripcionProveedor = ?, direccionProveedor = ?, telefono = ?, Correo = ?, infoAdicional = ? WHERE idProveedor = ?");
+    if (!$stmt) return false;
+    $stmt->bind_param('ssssssi', $data['nombreProveedor'], $data['descripcionProveedor'], $data['direccionProveedor'], $data['telefono'], $data['Correo'], $data['infoAdicional'], $id);
+    return $stmt->execute();
+}
 
 $registroActualizado = false;
 
+// --- Manejo de la petición GET (cargar datos del proveedor) ---
 if (isset($_GET['id'])) {
-    $id = $_GET['id'];
-    $sql = "SELECT * FROM Proveedores WHERE idProveedor = $id";
-    $result = $conn->query($sql);
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-    } else {
+    // Aseguramos que $id sea un entero
+    $id = (int) $_GET['id'];
+    $row = obtenerProveedorPorId($conn, $id);
+    if ($row === false) {
         echo "Proveedor no encontrado.";
         exit();
     }
 }
 
+// --- Manejo de la petición POST (actualizar proveedor) ---
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nombreProveedor = $_POST['nombreProveedor'];
-    $descripcionProveedor = $_POST['descripcionProveedor'];
-    $direccionProveedor = $_POST['direccionProveedor'];
-    $telefono = $_POST['telefono'];
-    $correo = $_POST['Correo'];
-    $infoAdicional = $_POST['infoAdicional'];
+    // Recogemos y saneamos las entradas del formulario
+    $nombreProveedor = isset($_POST['nombreProveedor']) ? trim($_POST['nombreProveedor']) : '';
+    $descripcionProveedor = isset($_POST['descripcionProveedor']) ? trim($_POST['descripcionProveedor']) : '';
+    $direccionProveedor = isset($_POST['direccionProveedor']) ? trim($_POST['direccionProveedor']) : '';
+    $telefono = isset($_POST['telefono']) ? trim($_POST['telefono']) : '';
+    $correo = isset($_POST['Correo']) ? trim($_POST['Correo']) : '';
+    $infoAdicional = isset($_POST['infoAdicional']) ? trim($_POST['infoAdicional']) : '';
 
-    $sql = "UPDATE Proveedores SET 
-            nombreProveedor='$nombreProveedor', 
-            descripcionProveedor='$descripcionProveedor', 
-            direccionProveedor='$direccionProveedor', 
-            telefono='$telefono', 
-            Correo='$correo', 
-            infoAdicional='$infoAdicional' 
-            WHERE idProveedor = $id";
+    $data = [
+        'nombreProveedor' => $nombreProveedor,
+        'descripcionProveedor' => $descripcionProveedor,
+        'direccionProveedor' => $direccionProveedor,
+        'telefono' => $telefono,
+        'Correo' => $correo,
+        'infoAdicional' => $infoAdicional
+    ];
 
-    if ($conn->query($sql) === TRUE) {
+    // Intentamos actualizar usando la función segura
+    if (actualizarProveedor($conn, $id, $data)) {
+        // Mensaje de sesión (si existe session_start() en includes/header.php lo usará)
         $_SESSION['message'] = 'Entrada actualizada correctamente';
         $_SESSION['message_type'] = 'success';
         
         header("Location: dashboard.php");
         exit();
     } else {
+        // Mostramos el error bruto de MySQL para depuración (se puede mejorar)
         echo "Error actualizando registro: " . $conn->error;
     }
     $conn->close();

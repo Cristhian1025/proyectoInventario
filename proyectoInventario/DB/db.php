@@ -1,14 +1,20 @@
 <?php
-    session_start();
+/**
+ * DB/db.php
+ *
+ * Archivo de conexión a la base de datos (copia/alternativa). Encabezado en español añadido.
+ */
+
+session_start();
 
 $conn = mysqli_connect(
     'localhost',
     'root',
-    '1025',
+    '0000',
     'inventario'
 );
-if ($conn->connect_error) {
-    die("Conexión fallida: " . $conn->connect_error);
-}
 
+if (!$conn) {
+    die("Conexión fallida: " . mysqli_connect_error());
+}
 ?>

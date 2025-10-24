@@ -1,4 +1,11 @@
 <?php
+/**
+ * delete_entrada.php
+ *
+ * Script que elimina una entrada de productos y ajusta el stock restando
+ * la cantidad correspondiente. Se añadió encabezado de documentación en español.
+ */
+
 include("db.php");
 
 if (isset($_GET['id'])) {

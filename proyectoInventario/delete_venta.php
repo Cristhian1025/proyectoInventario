@@ -1,18 +1,34 @@
 <?php
-include("db.php");
+/**
+ * delete_venta.php
+ *
+ * Este script elimina una venta de la base de datos y restaura el stock 
+ * de los productos involucrados en la misma. Utiliza transacciones 
+ * para asegurar la integridad de los datos.
+ *
+ * @package Inventario
+ * @version 1.1
+ */
 
-if (isset($_GET['id'])) {
-    $idVenta = $_GET['id'];
+include("db.php"); // Conexión a la base de datos
 
+// Verifica que el ID de la venta se haya enviado por la URL
+if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+    $idVenta = (int) $_GET['id'];
+
+    // Asegura que la sesión esté iniciada antes de usar $_SESSION
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
 
-    // Iniciar transacción
+    // Inicia una transacción para mantener la consistencia de los datos
     mysqli_begin_transaction($conn);
 
     try {
-        // 1. Obtener los detalles de la venta para saber qué productos y cantidades devolver
+        /**
+         * 1️⃣ Obtener los productos y cantidades asociados a la venta
+         *    Esto permitirá restaurar el stock correctamente.
+         */
         $query_detalles = "SELECT productoId, cantidad FROM detalle_venta WHERE ventaId = ?";
         $stmt_detalles = mysqli_prepare($conn, $query_detalles);
         mysqli_stmt_bind_param($stmt_detalles, "i", $idVenta);
@@ -20,49 +36,60 @@ if (isset($_GET['id'])) {
         $result_detalles = mysqli_stmt_get_result($stmt_detalles);
         $detalles_venta = mysqli_fetch_all($result_detalles, MYSQLI_ASSOC);
 
-        if (empty($detalles_venta)) {
-            // Si no hay detalles, puede ser una venta vacía o un error. Solo borramos la venta principal.
-            // No se lanza excepción para permitir la limpieza de posibles ventas huérfanas.
-        } else {
-            // 2. Devolver cada producto al stock
+        /**
+         * 2️⃣ Restaurar el stock de cada producto vendido
+         *    Si no hay detalles, simplemente se elimina la venta.
+         */
+        if (!empty($detalles_venta)) {
             foreach ($detalles_venta as $detalle) {
-                $productoId = $detalle['productoId'];
-                $cantidadDevolver = $detalle['cantidad'];
+                $productoId = (int) $detalle['productoId'];
+                $cantidadDevolver = (int) $detalle['cantidad'];
 
                 $query_update_stock = "UPDATE productos SET cantidad = cantidad + ? WHERE idProducto = ?";
                 $stmt_update_stock = mysqli_prepare($conn, $query_update_stock);
                 mysqli_stmt_bind_param($stmt_update_stock, "ii", $cantidadDevolver, $productoId);
+
                 if (!mysqli_stmt_execute($stmt_update_stock)) {
-                    throw new Exception("Error al devolver el stock del producto ID: " . $productoId);
+                    throw new Exception("Error al devolver el stock del producto ID: $productoId");
                 }
+                mysqli_stmt_close($stmt_update_stock);
             }
         }
 
-        // 3. Eliminar la venta de la tabla 'ventas'
-        // La FK con ON DELETE CASCADE se encargará de borrar los registros en 'detalle_venta'
+        /**
+         * 3️⃣ Eliminar la venta principal
+         *    Si la relación tiene ON DELETE CASCADE, los detalles se eliminan automáticamente.
+         */
         $query_delete_venta = "DELETE FROM ventas WHERE idVenta = ?";
         $stmt_delete_venta = mysqli_prepare($conn, $query_delete_venta);
         mysqli_stmt_bind_param($stmt_delete_venta, "i", $idVenta);
+
         if (!mysqli_stmt_execute($stmt_delete_venta)) {
-            throw new Exception("Error al eliminar la venta principal.");
+            throw new Exception("Error al eliminar la venta principal (ID: $idVenta).");
         }
 
-        // Si todo fue bien, confirmar la transacción
+        // Confirmar transacción si todo fue correcto
         mysqli_commit($conn);
-        $_SESSION['message'] = 'Venta eliminada correctamente y stock restaurado.';
+
+        $_SESSION['message'] = '✅ Venta eliminada correctamente y stock restaurado.';
         $_SESSION['message_type'] = 'success';
 
     } catch (Exception $e) {
-        // Si algo falló, revertir todos los cambios
+        // Si ocurre un error, revertir todos los cambios
         mysqli_rollback($conn);
-        $_SESSION['message'] = 'Error al eliminar la venta: ' . $e->getMessage();
+        $_SESSION['message'] = '❌ Error al eliminar la venta: ' . $e->getMessage();
         $_SESSION['message_type'] = 'danger';
+
+        // Registrar el error en el log del servidor
+        error_log("Error eliminando venta ID $idVenta: " . $e->getMessage());
     }
 
+    // Redirigir de vuelta al listado de ventas
     header("Location: listado_ventas.php");
     exit();
 
 } else {
-    die("ID de venta no proporcionado.");
+    // Si el ID no es válido o no se envió
+    die("⚠️ ID de venta no proporcionado o inválido.");
 }
 ?>
