@@ -18,6 +18,16 @@ if (isset($_POST['save_venta'])) {
     $cedulaNit = !empty($_POST['cedulaNit']) ? $_POST['cedulaNit'] : NULL;
     $nombreCliente = !empty($_POST['nombreCliente']) ? $_POST['nombreCliente'] : NULL;
 
+    // Validar cedulaNit
+    if ($cedulaNit !== NULL) {
+        if (!preg_match('/^[0-9]{5,20}$/', $cedulaNit)) {
+            $_SESSION['message'] = 'La Cédula/NIT debe contener solo números y tener entre 5 y 20 dígitos.';
+            $_SESSION['message_type'] = 'danger';
+            header("Location: ventas.php");
+            exit;
+        }
+    }
+
     // Iniciar transacción
     mysqli_begin_transaction($conn);
 
