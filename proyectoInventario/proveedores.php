@@ -14,47 +14,75 @@ require_once("includes/header.php");
 ?>
 
 <div class="container mt-5">
-    <h2 class="mb-4">Crear Nuevo Proveedor</h2>
-    <form action="save_proveedor.php" method="POST" class="needs-validation" novalidate>
-        <div class="form-group">
-            <label for="nombreProveedor">Nombre del Proveedor:</label>
-            <input type="text" class="form-control" id="nombreProveedor" name="nombreProveedor"
-                   placeholder="Ingrese el nombre del proveedor" value="" required>
-            <div class="invalid-feedback">Por favor, ingrese el nombre del proveedor.</div>
+    <div class="card card-glass">
+        <div class="card-header">
+            <h2 class="mb-0">Crear Nuevo Proveedor</h2>
         </div>
-        <div class="form-group">
-            <label for="descripcionProveedor">Descripción del Proveedor:</label>
-            <textarea class="form-control" id="descripcionProveedor" name="descripcionProveedor"
-                      placeholder="Ingrese una descripción del proveedor" required></textarea>
-            <div class="invalid-feedback">Por favor, ingrese una descripción del proveedor.</div>
+        <div class="card-body">
+            <form action="save_proveedor.php" method="POST" class="needs-validation" novalidate>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="nombreProveedor">Nombre del Proveedor:</label>
+                            <input type="text" class="form-control" id="nombreProveedor" name="nombreProveedor"
+                                   placeholder="Ingrese el nombre del proveedor" value="" required maxlength="45">
+                            <div class="invalid-feedback">Por favor, ingrese el nombre del proveedor.</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="descripcionProveedor">Descripción del Proveedor:</label>
+                            <textarea class="form-control" id="descripcionProveedor" name="descripcionProveedor"
+                                      placeholder="Ingrese una descripción del proveedor" required maxlength="150"></textarea>
+                            <div class="invalid-feedback">Por favor, ingrese una descripción del proveedor.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="direccionProveedor">Dirección del Proveedor:</label>
+                            <input type="text" class="form-control" id="direccionProveedor" name="direccionProveedor"
+                                   placeholder="Ingrese la dirección del proveedor" value="" required maxlength="45">
+                            <div class="invalid-feedback">Por favor, ingrese la dirección del proveedor.</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="telefono">Teléfono:</label>
+                            <input type="tel" class="form-control" id="telefono" name="telefono"
+                                   placeholder="Ingrese el teléfono del proveedor" value="" required maxlength="45">
+                            <div class="invalid-feedback">Por favor, ingrese el teléfono del proveedor.</div>
+                            <small class="form-text text-muted">Formato: 123-456-7890</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="correo">Correo Electrónico:</label>
+                            <input type="email" class="form-control" id="correo" name="Correo"
+                                   placeholder="Ingrese el correo electrónico del proveedor" value="" required maxlength="45">
+                            <div class="invalid-feedback">Por favor, ingrese un correo electrónico válido.</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="infoAdicional">Información Adicional:</label>
+                            <textarea class="form-control" id="infoAdicional" name="infoAdicional"
+                                      placeholder="Ingrese información adicional" maxlength="45"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-end">
+                    <input type="submit" class="btn btn-success" name="save_proveedor" value="Guardar Proveedor">
+                </div>
+            </form>
         </div>
-        <div class="form-group">
-            <label for="direccionProveedor">Dirección del Proveedor:</label>
-            <input type="text" class="form-control" id="direccionProveedor" name="direccionProveedor"
-                   placeholder="Ingrese la dirección del proveedor" value="" required>
-            <div class="invalid-feedback">Por favor, ingrese la dirección del proveedor.</div>
-        </div>
-        <div class="form-group">
-            <label for="telefono">Teléfono:</label>
-            <input type="tel" class="form-control" id="telefono" name="telefono"
-                   placeholder="Ingrese el teléfono del proveedor" value="" required>
-            <div class="invalid-feedback">Por favor, ingrese el teléfono del proveedor.</div>
-            <small class="form-text text-muted">Formato: 123-456-7890</small>
-        </div>
-        <div class="form-group">
-            <label for="correo">Correo Electrónico:</label>
-            <input type="email" class="form-control" id="correo" name="Correo"
-                   placeholder="Ingrese el correo electrónico del proveedor" value="" required>
-            <div class="invalid-feedback">Por favor, ingrese un correo electrónico válido.</div>
-        </div>
-        <div class="form-group">
-            <label for="infoAdicional">Información Adicional:</label>
-            <textarea class="form-control" id="infoAdicional" name="infoAdicional"
-                       placeholder="Ingrese información adicional"></textarea>
-        </div>
-        <input type="submit" class="btn btn-success btn-block mx-4 my-4"
-               name="save_proveedor" value="Guardar Proveedor">
-    </form>
+    </div>
 </div>
 
 <?php

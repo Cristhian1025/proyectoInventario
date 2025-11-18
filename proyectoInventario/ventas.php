@@ -37,103 +37,108 @@ include("includes/header.php");
 ?>
 
 <div class="container mt-5">
-    <h2 class="mb-4 text-center">Registrar Nueva Venta</h2>
+    <div class="card card-glass">
+        <div class="card-header">
+            <h2 class="mb-0 text-center">Registrar Nueva Venta</h2>
+        </div>
+        <div class="card-body">
+            <?php if (isset($_SESSION['message'])) : ?>
+            <div class="alert alert-<?= htmlspecialchars($_SESSION['message_type']); ?> alert-dismissible fade show" role="alert">
+                <?= htmlspecialchars($_SESSION['message']); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <?php
+                unset($_SESSION['message']);
+                unset($_SESSION['message_type']);
+            ?>
+            <?php endif; ?>
 
-    <?php if (isset($_SESSION['message'])) : ?>
-    <div class="alert alert-<?= htmlspecialchars($_SESSION['message_type']); ?> alert-dismissible fade show" role="alert">
-        <?= htmlspecialchars($_SESSION['message']); ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <form action="save_venta.php" method="POST" id="form-registrar-venta">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="fechaVenta" class="form-label">Fecha de Venta <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="fechaVenta" name="fechaVenta" value="<?= date('Y-m-d'); ?>" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="vendedorId" class="form-label">Vendedor <span class="text-danger">*</span></label>
+                        <select class="form-select" id="vendedorId" name="vendedorId" required>
+                            <option value="">Selecciona un vendedor</option>
+                            <?php if (!empty($usuarios)) : ?>
+                                <?php foreach ($usuarios as $usuario) : ?>
+                                    <option value="<?php echo htmlspecialchars($usuario['idUsuario']); ?>">
+                                        <?php echo htmlspecialchars($usuario['nombreCompleto']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php else : ?>
+                                <option value="" disabled>No hay vendedores disponibles</option>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="cedulaNit" class="form-label">Cédula o Nit</label>
+                        <input type="text" class="form-control" id="cedulaNit" name="cedulaNit" placeholder="Cédula o Nit del cliente" maxlength="45">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="nombreCliente" class="form-label">Nombre del Cliente</label>
+                        <input type="text" class="form-control" id="nombreCliente" name="nombreCliente" placeholder="Nombre del cliente" maxlength="45">
+                    </div>
+                </div>
+
+                <hr>
+                <h4 class="mb-3">Productos</h4>
+                <div id="productos-container">
+                    <div class="producto-item row align-items-end mb-3 p-3 border rounded">
+                        <div class="col-md-5">
+                            <label class="form-label">Producto <span class="text-danger">*</span></label>
+                            <select class="form-select producto-select" name="productoId[]" required>
+                                <option value="">Selecciona un producto</option>
+                                <?php if (!empty($productos)) : ?>
+                                    <?php foreach ($productos as $producto) : ?>
+                                        <option value="<?php echo htmlspecialchars($producto['idProducto']); ?>" 
+                                                data-precio="<?php echo htmlspecialchars($producto['precioVenta'] ?? '0'); ?>">
+                                            <?php echo htmlspecialchars($producto['nombreProducto']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php else : ?>
+                                    <option value="" disabled>No hay productos disponibles</option>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Cantidad <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control cantidad-venta" name="cantidadVenta[]" min="1" max="989999" required placeholder="Ej: 1">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Precio U.</label>
+                            <input type="text" class="form-control precio-unitario bg-white" name="precioUnitario[]" placeholder="$0.00" readonly>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="button" class="btn btn-danger remove-product-btn" style="display:none;">Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <button type="button" class="btn btn-primary" id="add-product-btn">
+                        <i class="fas fa-plus"></i> Agregar Otro Producto
+                    </button>
+                    <div class="text-end">
+                        <h4>Total Venta: <span id="total-venta-display" class="fw-bold">$0.00</span></h4>
+                        <input type="hidden" name="precioVentaTotal" id="precioVentaTotalInput" value="0">
+                    </div>
+                </div>
+                
+                <hr>
+
+                <div class="d-grid gap-2 mt-4">
+                    <input type="submit" class="btn btn-success btn-lg" name="save_venta" value="Registrar Venta">
+                </div>
+            </form>
+        </div>
     </div>
-    <?php
-        unset($_SESSION['message']);
-        unset($_SESSION['message_type']);
-    ?>
-    <?php endif; ?>
-
-    <form action="save_venta.php" method="POST" id="form-registrar-venta">
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="fechaVenta" class="form-label">Fecha de Venta <span class="text-danger">*</span></label>
-                <input type="date" class="form-control" id="fechaVenta" name="fechaVenta" value="<?= date('Y-m-d'); ?>" required>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label for="vendedorId" class="form-label">Vendedor <span class="text-danger">*</span></label>
-                <select class="form-select" id="vendedorId" name="vendedorId" required>
-                    <option value="">Selecciona un vendedor</option>
-                    <?php if (!empty($usuarios)) : ?>
-                        <?php foreach ($usuarios as $usuario) : ?>
-                            <option value="<?php echo htmlspecialchars($usuario['idUsuario']); ?>">
-                                <?php echo htmlspecialchars($usuario['nombreCompleto']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    <?php else : ?>
-                        <option value="" disabled>No hay vendedores disponibles</option>
-                    <?php endif; ?>
-                </select>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="cedulaNit" class="form-label">Cédula o Nit</label>
-                <input type="text" class="form-control" id="cedulaNit" name="cedulaNit" placeholder="Cédula o Nit del cliente">
-            </div>
-            <div class="col-md-6 mb-3">
-                <label for="nombreCliente" class="form-label">Nombre del Cliente</label>
-                <input type="text" class="form-control" id="nombreCliente" name="nombreCliente" placeholder="Nombre del cliente">
-            </div>
-        </div>
-
-        <hr>
-        <h4 class="mb-3">Productos</h4>
-        <div id="productos-container">
-            <div class="producto-item row align-items-end mb-3 p-3 border rounded bg-light">
-                <div class="col-md-5">
-                    <label class="form-label">Producto <span class="text-danger">*</span></label>
-                    <select class="form-select producto-select" name="productoId[]" required>
-                        <option value="">Selecciona un producto</option>
-                        <?php if (!empty($productos)) : ?>
-                            <?php foreach ($productos as $producto) : ?>
-                                <option value="<?php echo htmlspecialchars($producto['idProducto']); ?>" 
-                                        data-precio="<?php echo htmlspecialchars($producto['precioVenta'] ?? '0'); ?>">
-                                    <?php echo htmlspecialchars($producto['nombreProducto']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        <?php else : ?>
-                            <option value="" disabled>No hay productos disponibles</option>
-                        <?php endif; ?>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Cantidad <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control cantidad-venta" name="cantidadVenta[]" min="1" required placeholder="Ej: 1">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Precio U.</label>
-                    <input type="text" class="form-control precio-unitario bg-white" name="precioUnitario[]" placeholder="$0.00" readonly>
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="button" class="btn btn-danger remove-product-btn" style="display:none;">Eliminar</button>
-                </div>
-            </div>
-        </div>
-
-        <button type="button" class="btn btn-primary mb-3" id="add-product-btn">
-            <i class="fas fa-plus"></i> Agregar Otro Producto
-        </button>
-        
-        <hr>
-        <div class="row justify-content-end">
-            <div class="col-md-4 text-end">
-                <h4>Total Venta: <span id="total-venta-display" class="fw-bold">$0.00</span></h4>
-                <input type="hidden" name="precioVentaTotal" id="precioVentaTotalInput" value="0">
-            </div>
-        </div>
-
-        <div class="d-grid gap-2 mt-4">
-            <input type="submit" class="btn btn-success btn-lg" name="save_venta" value="Registrar Venta">
-        </div>
-    </form>
 </div>
 
 <script>

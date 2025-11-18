@@ -102,3 +102,12 @@ nav {
 form{
   padding-bottom: 50px;
 }
+
+.card-glass {
+    background: rgba(255, 255, 255, 0.15); /* Fondo blanco semitransparente */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); /* Para compatibilidad con Safari */
+    border-radius: 1rem; /* Bordes más redondeados */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Borde sutil */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Sombra suave */
+}

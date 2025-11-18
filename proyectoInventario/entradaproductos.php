@@ -29,53 +29,78 @@ require_once("includes/header.php");
 ?>
 
 <div class="container mt-5">
-    <h2 class="mb-4">Registrar Entrada de Productos</h2>
-    <form action="save_entrada.php" method="POST" class="needs-validation" novalidate>
-        <div class="form-group">
-            <label for="fechaEntrada">Fecha de Entrada:</label>
-            <input type="date" class="form-control" id="fechaEntrada" name="fechaEntrada" value="" required>
-            <div class="invalid-feedback">Por favor, ingrese la fecha de entrada.</div>
+    <div class="card card-glass">
+        <div class="card-header">
+            <h2 class="mb-0">Registrar Entrada de Productos</h2>
         </div>
-        <div class="form-group">
-            <label for="productoId">Producto:</label>
-            <select class="form-control" id="productoId" name="productoId" required>
-                <option value="">Seleccione un producto</option>
-                <?php foreach ($productos as $producto): ?>
-                    <option value="<?php echo $producto['idProducto']; ?>">
-                        <?php echo $producto['nombreProducto']; ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-            <div class="invalid-feedback">Por favor, seleccione un producto.</div>
+        <div class="card-body">
+            <form action="save_entrada.php" method="POST" class="needs-validation" novalidate>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="productoId">Producto:</label>
+                            <select class="form-control" id="productoId" name="productoId" required>
+                                <option value="">Seleccione un producto</option>
+                                <?php foreach ($productos as $producto): ?>
+                                    <option value="<?php echo $producto['idProducto']; ?>">
+                                        <?php echo $producto['nombreProducto']; ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="invalid-feedback">Por favor, seleccione un producto.</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="proveedorId">Proveedor:</label>
+                            <select class="form-control" id="proveedorId" name="proveedorId" required>
+                                <option value="">Seleccione un proveedor</option>
+                                <?php foreach ($proveedores as $proveedor): ?>
+                                    <option value="<?php echo $proveedor['idProveedor']; ?>">
+                                        <?php echo $proveedor['nombreProveedor']; ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="invalid-feedback">Por favor, seleccione un proveedor.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="cantidadComprada">Cantidad Comprada:</label>
+                            <input type="number" class="form-control" id="cantidadComprada" name="cantidadComprada" value="" required
+                                   min="1" max="989999">
+                            <div class="invalid-feedback">Por favor, ingrese la cantidad comprada.</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="precioCompraUnidad">Precio de Compra por Unidad:</label>
+                            <input type="number" step="0.01" class="form-control" id="precioCompraUnidad" name="precioCompraUnidad"
+                                   value="" required min="0.01" max="9999.99">
+                            <div class="invalid-feedback">Por favor, ingrese el precio de compra por unidad.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="fechaEntrada">Fecha de Entrada:</label>
+                            <input type="date" class="form-control" id="fechaEntrada" name="fechaEntrada" value="" required>
+                            <div class="invalid-feedback">Por favor, ingrese la fecha de entrada.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-end">
+                    <input type="submit" class="btn btn-success" name="save_entrada" value="Registrar Entrada">
+                </div>
+            </form>
         </div>
-        <div class="form-group">
-            <label for="cantidadComprada">Cantidad Comprada:</label>
-            <input type="number" class="form-control" id="cantidadComprada" name="cantidadComprada" value="" required
-                   min="1">
-            <div class="invalid-feedback">Por favor, ingrese la cantidad comprada.</div>
-            <small class="form-text text-muted">Ingrese un número mayor que cero.</small>
-        </div>
-        <div class="form-group">
-            <label for="precioCompraUnidad">Precio de Compra por Unidad:</label>
-            <input type="number" step="0.01" class="form-control" id="precioCompraUnidad" name="precioCompraUnidad"
-                   value="" required min="0.01">
-            <div class="invalid-feedback">Por favor, ingrese el precio de compra por unidad.</div>
-            <small class="form-text text-muted">Ingrese un número mayor que cero.</small>
-        </div>
-        <div class="form-group">
-            <label for="proveedorId">Proveedor:</label>
-            <select class="form-control" id="proveedorId" name="proveedorId" required>
-                <option value="">Seleccione un proveedor</option>
-                <?php foreach ($proveedores as $proveedor): ?>
-                    <option value="<?php echo $proveedor['idProveedor']; ?>">
-                        <?php echo $proveedor['nombreProveedor']; ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-            <div class="invalid-feedback">Por favor, seleccione un proveedor.</div>
-        </div>
-        <input type="submit" class="btn btn-success btn-block mx-4 my-4" name="save_entrada" value="Registrar Entrada">
-    </form>
+    </div>
 </div>
 
 <?php
