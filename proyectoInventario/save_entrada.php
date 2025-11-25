@@ -1,6 +1,11 @@
 <?php
 include("db.php");
 
+if (!isset($_SESSION['id_usuario'])) {
+    header("Location: index.php");
+    exit();
+}
+
 if (isset($_POST['save_entrada'])) {
     $fechaEntrada = $_POST['fechaEntrada'];
     $productoId = $_POST['productoId'];

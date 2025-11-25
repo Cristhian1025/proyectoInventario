@@ -1,8 +1,13 @@
 <?php
+include("db.php");
+
+if (!isset($_SESSION['id_usuario'])) {
+    header("Location: index.php");
+    exit();
+}
+
 if (isset($_POST['save_proveedor'])){
     echo "Guardando DATOS";
-    
-    include("db.php");
 
     $nombreProveedor = $_POST["nombreProveedor"];
     $descripcionProveedor = $_POST["descripcionProveedor"];

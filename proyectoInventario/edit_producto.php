@@ -1,6 +1,11 @@
 <?php
 include("db.php");
 
+if (!isset($_SESSION['id_usuario'])) {
+    header("Location: index.php");
+    exit();
+}
+
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
     $sql = "SELECT * FROM Productos WHERE idProducto = $id";

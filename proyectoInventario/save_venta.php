@@ -5,6 +5,11 @@ error_reporting(E_ALL);
 
 include("db.php");
 
+if (!isset($_SESSION['id_usuario'])) {
+    header("Location: index.php");
+    exit();
+}
+
 if (isset($_POST['save_venta'])) {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();

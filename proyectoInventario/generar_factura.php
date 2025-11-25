@@ -1,6 +1,11 @@
 <?php
 require('fpdf/fpdf.php');
 require('db.php');
+
+if (!isset($_SESSION['id_usuario'])) {
+    header("Location: index.php");
+    exit();
+}
 require('queries/venta_querie.php');
 
 if (!isset($_GET['id_venta']) || !is_numeric($_GET['id_venta'])) {

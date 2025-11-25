@@ -1,7 +1,13 @@
-<?php    
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        echo "Guardando DATOS";
-        include("db.php");
+<?php
+include("db.php");
+
+if (!isset($_SESSION['id_usuario'])) {
+    header("Location: index.php");
+    exit();
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    echo "Guardando DATOS";
 
         $nombreProducto = $_POST['nombreProducto'];
         $descripcionProducto = $_POST['descripcionProducto'];
